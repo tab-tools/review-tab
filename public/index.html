@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review Tab</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='2' y='4' width='28' height='24' rx='5' stroke='%2352525B' stroke-width='3'/%3E%3Cpath d='M2 12h28M14 12v16' stroke='%2352525B' stroke-width='2.5'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #FAFAFA;
+      --card: #FFFFFF;
+      --card2: #F4F4F5;
+      --line: #E4E4E7;
+      --ink: #09090B;
+      --muted: #71717A;
+      --hunkbar: #F4F4F5;
+      --accent: #18181B;
+      --accent-ink: #FFFFFF;
+      --add-bg: #E6F4EA;
+      --add-fg: #15803D;
+      --del-bg: #FCE8E6;
+      --del-fg: #B91C1C;
+      --warn: #71717A;
+      --warn-bg: #F4F4F5;
+      --warn-fg: #71717A;
+      --blue-bg: #F4F4F5;
+      --blue-fg: #09090B;
+      --purple-bg: #F4F4F5;
+      --purple-fg: #09090B;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      --menu-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg: #09090B;
+      --card: #121215;
+      --card2: #18181B;
+      --line: #3F3F46;
+      --ink: #FFFFFF;
+      --muted: #A1A1AA;
+      --hunkbar: #18181B;
+      --accent: #FFFFFF;
+      --accent-ink: #09090B;
+      --add-bg: #052E16;
+      --add-fg: #4ADE80;
+      --del-bg: #451A1A;
+      --del-fg: #F87171;
+      --warn: #A1A1AA;
+      --warn-bg: #27272A;
+      --warn-fg: #A1A1AA;
+      --blue-bg: #27272A;
+      --blue-fg: #FFFFFF;
+      --purple-bg: #27272A;
+      --purple-fg: #FFFFFF;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+      --menu-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+    }
+
+    [data-theme="dark"] button,
+    [data-theme="dark"] .mode-seg,
+    [data-theme="dark"] .viewed-toggle {
+      border-color: #3F3F46 !important;
+    }
+
+    [data-theme="dark"] button:hover,
+    [data-theme="dark"] .mode-seg:hover,
+    [data-theme="dark"] .viewed-toggle:hover {
+      border-color: #71717A !important;
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(113, 113, 122, 0.35) transparent;
+    }
+
+    [data-theme="dark"] {
+      scrollbar-color: rgba(161, 161, 170, 0.25) transparent;
+    }
+
+    /* Custom Modern Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(113, 113, 122, 0.35);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(113, 113, 122, 0.6);
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    [data-theme="dark"] ::-webkit-scrollbar-thumb {
+      background: rgba(161, 161, 170, 0.25);
+    }
+
+    [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+      background: rgba(161, 161, 170, 0.5);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.5 var(--sans);
+      transition: background 0.55s ease, color 0.55s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--ink);
+      cursor: default;
+    }
+
+    header h1 .brand-pill {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: var(--card);
+      padding: 3px 8px;
+      border-radius: 6px;
+      line-height: 1;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      transform: translateY(1px);
+    }
+
+    header h1 .ver {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2.5px 8px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      opacity: 0;
+      transform: translateX(-8px) scale(0.95);
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    header h1:hover .ver {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+      color: var(--ink);
+    }
+
+    .sidebar-project {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-project .project-icon {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .sidebar-project .project-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-section-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 4px 0 3px 0;
+    }
+
+    [data-theme="dark"] .sidebar-section-divider {
+      background: #52525B !important;
+      height: 1px !important;
+    }
+
+    [data-theme="dark"] .sidebar-project {
+      background: #18181B !important;
+      border: 1px solid #52525B !important;
+    }
+
+    .sidebar-files-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 0;
+    }
+
+
+
+
+
+    header .spacer {
+      flex: 1;
+    }
+
+    button {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      line-height: 1.4;
+      transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+
+    button:hover {
+      border-color: var(--muted);
+      background: var(--card2);
+    }
+
+    /* Fixed height so icon-only buttons match text buttons (native button chrome adds hidden padding). */
+    header button {
+      height: 34px;
+    }
+
+    .btn-keep {
+      font-family: var(--sans);
+      font-weight: 500;
+      color: var(--ink);
+      border-color: var(--line);
+      background: var(--card);
+    }
+
+    .btn-keep:hover,
+    .btn-keep:focus-visible {
+      background: var(--card2);
+      color: var(--add-fg);
+      border-color: var(--line);
+    }
+
+    .btn-restore {
+      font-family: var(--sans);
+      font-weight: 500;
+      color: var(--ink);
+      border-color: var(--line);
+      background: var(--card);
+    }
+
+    .btn-restore:hover,
+    .btn-restore:focus-visible {
+      background: var(--card2);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .btn-viewed {
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .btn-viewed:hover,
+    .btn-viewed:focus-visible {
+      background: var(--card2);
+      border-color: var(--line);
+    }
+
+    .viewed-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 14px;
+      height: 32px;
+      background: var(--card);
+      user-select: none;
+      box-sizing: border-box;
+      line-height: 1.4;
+      transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+
+    .viewed-toggle:hover {
+      border-color: var(--muted);
+      background: var(--card2);
+      color: var(--ink);
+    }
+
+    .viewed-toggle input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      border: 1.5px solid var(--muted);
+      border-radius: 3.5px;
+      background: transparent;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .viewed-toggle input::before {
+      content: "";
+      width: 7px;
+      height: 4px;
+      border-left: 2px solid var(--card);
+      border-bottom: 2px solid var(--card);
+      transform: rotate(-45deg) translate(0.5px, -0.5px) scale(0);
+      transition: transform 0.15s ease;
+    }
+
+    .viewed-toggle input:checked {
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .viewed-toggle input:checked::before {
+      transform: rotate(-45deg) translate(0.5px, -0.5px) scale(1);
+    }
+
+    .viewed-toggle:hover input:not(:checked) {
+      border-color: var(--ink);
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+      font-weight: 600;
+    }
+
+    button.primary:hover {
+      opacity: .9;
+    }
+
+    button.primary:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(9, 9, 11, 0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-overlay.hidden {
+      display: none;
+    }
+
+    .confirm-modal {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      padding: 28px;
+      width: 580px;
+      max-width: calc(100vw - 32px);
+    }
+
+    body.modal-open .completion-title-floating,
+    body.modal-open .completion-overlay {
+      display: none !important;
+    }
+
+    .confirm-modal h2 {
+      margin: 0 0 18px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .confirm-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .cs-tile {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 6px;
+      text-align: center;
+      min-width: 0;
+      box-sizing: border-box;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .cs-tile:hover {
+      border-color: var(--ink) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .cs-tile:active {
+      transform: translateY(0);
+    }
+
+    .cs-tile .cs-num {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .cs-tile .cs-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 480px) {
+      .confirm-modal {
+        padding: 20px 16px 18px;
+      }
+
+      .confirm-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+    }
+
+    .cs-tile.cs-files .cs-num {
+      color: #4B5563;
+    }
+
+    .cs-tile.cs-kept .cs-num {
+      color: #16A34A;
+    }
+
+    .cs-tile.cs-partial .cs-num {
+      color: #D97706;
+    }
+
+    .cs-tile.cs-restored .cs-num {
+      color: #475569;
+    }
+
+    [data-theme="dark"] .confirm-modal {
+      background: #121215 !important;
+      border: 1px solid #3F3F46 !important;
+    }
+
+    [data-theme="dark"] .cs-tile {
+      background: #18181B !important;
+      border: 1px solid #3F3F46 !important;
+    }
+
+    [data-theme="dark"] .cs-tile .cs-lbl {
+      color: #A1A1AA !important;
+    }
+
+    [data-theme="dark"] .cs-tile.cs-files .cs-num {
+      color: #E4E4E7 !important;
+    }
+
+    [data-theme="dark"] .cs-tile.cs-kept .cs-num {
+      color: #4ADE80 !important;
+    }
+
+    [data-theme="dark"] .cs-tile.cs-partial .cs-num {
+      color: #FBBF24 !important;
+    }
+
+    [data-theme="dark"] .cs-tile.cs-restored .cs-num {
+      color: #60A5FA !important;
+    }
+
+    .confirm-msg {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .confirm-msg strong {
+      color: var(--ink);
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .confirm-actions button {
+      min-width: 90px;
+    }
+
+    #theme {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      line-height: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+
+    #theme svg {
+      width: 15px;
+      height: 15px;
+      transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), opacity .2s;
+    }
+
+    #theme.switching svg {
+      transform: rotate(180deg) scale(0);
+      opacity: 0;
+    }
+
+    /* Disable default cross-fade so JS clip-path animation takes over. */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+      mix-blend-mode: normal;
+    }
+
+    ::view-transition-new(root) {
+      z-index: 999;
+    }
+
+    /* Fallback: broad CSS transitions when View Transitions API is unavailable */
+    .theme-transition *,
+    .theme-transition *::before,
+    .theme-transition *::after {
+      transition: background-color 0.55s ease, border-color 0.55s ease, color 0.55s ease, box-shadow 0.55s ease !important;
+    }
+
+    .mode-seg {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 2px;
+      height: 34px;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    .mode-thumb {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      left: 2px;
+      width: calc(50% - 2px);
+      background: var(--ink);
+      border-radius: 6px;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .mode-seg[data-active-mode="accumulate"] .mode-thumb {
+      transform: translateX(100%);
+    }
+
+    .mode-seg[data-active-mode="per-request"] .mode-thumb {
+      transform: translateX(0);
+    }
+
+    .mode-seg .mode-seg-btn {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      padding: 0 14px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      opacity: .55;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color .2s ease, opacity .2s ease;
+    }
+
+    .mode-seg .mode-seg-btn.active {
+      color: var(--accent-ink);
+      opacity: 1;
+      font-weight: 600;
+    }
+
+    .mode-seg .mode-seg-btn:hover:not(.active) {
+      opacity: 1;
+    }
+
+    #main {
+      transition: opacity .15s ease;
+    }
+
+    #main.mode-loading {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    #main.mode-switching {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .wrap {
+      padding: 24px;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow);
+      transition: border-color .15s;
+    }
+
+    .stat:hover {
+      border-color: var(--muted);
+    }
+
+    .stat .num {
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--ink);
+    }
+
+    .stat .lbl {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .stat .badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat.files .badge {
+      background: #F8FAFC;
+      color: #6B7280;
+    }
+
+    .stat.changes .badge {
+      background: #F5F3FF;
+      color: #6B7280;
+    }
+
+    .stat.kept .badge {
+      background: #ECFDF3;
+      color: #15803D;
+    }
+
+    .stat.partial .badge {
+      background: #FFFBEB;
+      color: #A16207;
+    }
+
+    .stat.restored .badge {
+      background: #F8F9FB;
+      color: #64748B;
+    }
+
+    [data-theme="dark"] .stat.files .badge {
+      background: #1E293B;
+      color: #94A3B8;
+    }
+
+    [data-theme="dark"] .stat.changes .badge {
+      background: #2E2A4A;
+      color: #A78BFA;
+    }
+
+    [data-theme="dark"] .stat.kept .badge {
+      background: #052E16;
+      color: #4ADE80;
+    }
+
+    [data-theme="dark"] .stat.partial .badge {
+      background: #2E2109;
+      color: #FACC15;
+    }
+
+    [data-theme="dark"] .stat.restored .badge {
+      background: #1E293B;
+      color: #94A3B8;
+    }
+
+    .layout {
+      display: flex;
+      align-items: stretch;
+      flex: 1;
+    }
+
+    .sidebar {
+      flex-shrink: 0;
+      width: 300px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: sticky;
+      top: 90px;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 110px);
+    }
+
+    .resize-handle {
+      flex-shrink: 0;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: col-resize;
+      position: relative;
+    }
+
+    .resize-handle::after {
+      content: '';
+      width: 2px;
+      height: 48px;
+      background: var(--line);
+      border-radius: 2px;
+      transition: background .15s, height .15s;
+    }
+
+    .resize-handle:hover::after,
+    .resize-handle.dragging::after {
+      background: var(--muted);
+      height: 64px;
+    }
+
+    .resize-handle .rh-dots {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity .15s;
+      pointer-events: none;
+    }
+
+    .resize-handle:hover .rh-dots,
+    .resize-handle.dragging .rh-dots {
+      opacity: 1;
+    }
+
+    .resize-handle .rh-dots span {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--muted);
+      display: block;
+    }
+
+    .sfile-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .sidebar-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-head .sf-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .sf-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sf-search {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .sf-search-icon {
+      position: absolute;
+      left: 9px;
+      display: flex;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .sf-search input {
+      width: 100%;
+      box-sizing: border-box;
+      height: 34px;
+      padding: 0 26px 0 30px;
+      font: inherit;
+      font-size: 13px;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .sf-search input:focus {
+      border-color: var(--ink);
+    }
+
+    .sf-search input::placeholder {
+      color: var(--muted);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .sf-clear {
+      position: absolute;
+      right: 4px;
+      padding: 3px;
+      line-height: 0;
+      border: 0;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .sf-clear:hover {
+      background: var(--line);
+      color: inherit;
+    }
+
+    .filter-dd {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .filter-dd-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      line-height: 0;
+      color: var(--muted);
+    }
+
+    .filter-dd-btn:hover {
+      color: inherit;
+    }
+
+    [data-theme="dark"] .sf-search input,
+    [data-theme="dark"] .filter-dd-btn {
+      background: #18181B !important;
+      border: 1px solid #52525B !important;
+      color: #FFFFFF !important;
+    }
+
+    [data-theme="dark"] .sf-search input:focus,
+    [data-theme="dark"] .filter-dd-btn:hover {
+      border-color: #A1A1AA !important;
+      color: #FFFFFF !important;
+    }
+
+    [data-theme="dark"] .sf-search-icon {
+      color: #A1A1AA !important;
+    }
+
+    .filter-dd-btn.active {
+      background: var(--card2);
+      border-color: var(--muted);
+      color: var(--ink);
+    }
+
+    .filter-dd-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      width: 170px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--menu-shadow);
+      padding: 6px;
+      z-index: 30;
+      opacity: 0;
+      transform: translateY(-6px) scale(.98);
+      pointer-events: none;
+      transition: opacity .14s ease, transform .14s ease;
+    }
+
+    .filter-dd-menu.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .filter-dd-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .filter-dd-item:hover,
+    .filter-dd-item:focus {
+      background: var(--card2);
+      outline: none;
+    }
+
+    .filter-dd-item .fdi-check {
+      display: flex;
+      color: var(--ink);
+      flex-shrink: 0;
+      visibility: hidden;
+    }
+
+    .filter-dd-item.selected .fdi-check {
+      visibility: visible;
+    }
+
+    .filter-dd-item.selected .fdi-label {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .sfile-empty {
+      padding: 18px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .sfile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--line);
+      border-left: 3px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+
+    .sfile:last-child {
+      border-bottom: 0;
+    }
+
+    .sfile:hover {
+      background: var(--card2);
+    }
+
+    .sfile.current {
+      background: var(--card2);
+      border-left-color: var(--ink);
+    }
+
+    .sfile-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sfile-icon.viewed {
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    .sfile-icon.pending {
+      border: 1.5px solid var(--line);
+    }
+
+    .sfile-info {
+      min-width: 0;
+    }
+
+    .sfile-name {
+      font-size: 13px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sfile-dir {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-family: var(--mono);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .detail {
+      flex: 1;
+      min-width: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    @keyframes crSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes crSlideOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(-24px);
+      }
+    }
+
+    .detail.slide-in {
+      animation: crSlideIn .22s ease-out;
+    }
+
+    .detail.slide-out {
+      animation: crSlideOut .18s ease-in;
+    }
+
+    .dhead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dhead .ficon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dhead .fmeta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .dhead .fname {
+      font-size: 15px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dhead .fdir {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .dhead .copy-path {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      width: 34px;
+      height: 34px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .dhead .copy-path:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .dstats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+      font-family: var(--sans);
+      font-size: 13px;
+    }
+
+    .dstats .plus {
+      color: var(--add-fg);
+      font-family: var(--mono);
+    }
+
+    .dstats .minus {
+      color: var(--del-fg);
+      font-family: var(--mono);
+    }
+
+    .dstats .fileacts {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+    }
+
+    @keyframes crPulseKeep {
+      0% {
+        outline: 2px solid var(--add-fg);
+        outline-offset: -2px;
+        background-color: var(--add-bg) !important;
+      }
+
+      50% {
+        outline: 2px solid var(--add-fg);
+        outline-offset: -2px;
+        background-color: var(--add-bg) !important;
+      }
+
+      100% {
+        outline: 2px solid transparent;
+        outline-offset: -2px;
+      }
+    }
+
+    @keyframes crPulseRestore {
+      0% {
+        outline: 2px solid var(--del-fg);
+        outline-offset: -2px;
+        background-color: var(--del-bg) !important;
+      }
+
+      50% {
+        outline: 2px solid var(--del-fg);
+        outline-offset: -2px;
+        background-color: var(--del-bg) !important;
+      }
+
+      100% {
+        outline: 2px solid transparent;
+        outline-offset: -2px;
+      }
+    }
+
+    @keyframes crPulseDefault {
+      0% {
+        outline: 2px solid var(--ink);
+        outline-offset: -2px;
+      }
+
+      100% {
+        outline: 2px solid transparent;
+        outline-offset: -2px;
+      }
+    }
+
+    @keyframes crBtnPulseKeep {
+      0% {
+        transform: scale(0.95);
+        border-color: var(--add-fg);
+        color: var(--add-fg);
+      }
+
+      50% {
+        transform: scale(1.05);
+        border-color: var(--add-fg);
+        color: var(--add-fg);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes crBtnPulseRestore {
+      0% {
+        transform: scale(0.95);
+        border-color: var(--del-fg);
+        color: var(--del-fg);
+      }
+
+      50% {
+        transform: scale(1.05);
+        border-color: var(--del-fg);
+        color: var(--del-fg);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    button.pulse-btn-keep {
+      animation: crBtnPulseKeep 0.4s ease-out;
+    }
+
+    button.pulse-btn-restore {
+      animation: crBtnPulseRestore 0.4s ease-out;
+    }
+
+    .hunk {
+      position: relative;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hunk.pulse pre,
+    .hunk.pulse-default pre {
+      animation: crPulseDefault .55s ease-out;
+    }
+
+    .hunk.pulse-keep pre {
+      animation: crPulseKeep .55s ease-out;
+    }
+
+    .hunk.pulse-restore pre {
+      animation: crPulseRestore .55s ease-out;
+    }
+
+    .hunk:last-child {
+      border-bottom: 0;
+    }
+
+    .hunkbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--hunkbar);
+    }
+
+    .hunk-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 6px;
+    }
+
+    .hunk-chev {
+      display: flex;
+      color: var(--muted);
+      transition: transform .15s ease;
+      transform: rotate(180deg);
+    }
+
+    .hunk.collapsed .hunk-chev {
+      transform: rotate(0deg);
+    }
+
+    .hunk-title {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .hunk-range {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11.5px;
+    }
+
+    .hunkbar .acts {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+    }
+
+    .hunkbar button {
+      padding: 3px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .hunk.kept .hunkbar .st {
+      color: var(--add-fg);
+    }
+
+    .hunk.restored .hunk-range,
+    .hunk.restored .hunkbar .st {
+      color: var(--del-fg);
+    }
+
+    .hunk.partial .hunk-range,
+    .hunk.partial .hunkbar .st {
+      color: var(--muted);
+    }
+
+    .hunk.restored pre {
+      opacity: .6;
+    }
+
+    .hunk.collapsed pre,
+    .hunk.collapsed .reason {
+      display: none;
+    }
+
+    pre {
+      margin: 0;
+      padding: 4px 0;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.65;
+    }
+
+    pre .l {
+      display: flex;
+      min-width: 100%;
+    }
+
+    pre .l .gutter {
+      flex-shrink: 0;
+      width: 74px;
+      display: flex;
+      user-select: none;
+      color: var(--muted);
+      opacity: .7;
+    }
+
+    pre .l .gutter span {
+      flex: 1;
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    pre .l .txt {
+      padding: 0 16px;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      min-width: 0;
+      flex: 1;
+    }
+
+    pre .a {
+      background: var(--add-bg);
+      color: var(--add-fg);
+    }
+
+    pre .d {
+      background: var(--del-bg);
+      color: var(--del-fg);
+    }
+
+    pre .c {
+      color: var(--muted);
+    }
+
+    pre .a .txt,
+    pre .d .txt {
+      cursor: pointer;
+    }
+
+    pre .a:hover .txt,
+    pre .d:hover .txt {
+      outline: 1px solid var(--muted);
+      outline-offset: -1px;
+    }
+
+    pre .rej .txt {
+      text-decoration: line-through;
+      opacity: .55;
+    }
+
+    pre .rej .txt::after {
+      content: ' \21a9 reverting';
+      text-decoration: none;
+      opacity: .9;
+      font-size: 11px;
+      color: var(--del-fg);
+    }
+
+    pre .restoring .txt {
+      opacity: 1;
+    }
+
+    pre .restoring .txt::after {
+      content: ' \21a9 restoring';
+      text-decoration: none;
+      opacity: .9;
+      font-size: 11px;
+      color: var(--add-fg);
+    }
+
+    .seg {
+      position: relative;
+      border-left: 2px solid var(--line);
+    }
+
+    .seg:hover {
+      border-left-color: var(--muted);
+    }
+
+    .segbar {
+      position: absolute;
+      right: 8px;
+      top: 2px;
+      display: none;
+      gap: 4px;
+      z-index: 2;
+    }
+
+    .seg:hover .segbar {
+      display: flex;
+    }
+
+    .segbar button {
+      padding: 1px 8px;
+      font-size: 11px;
+      border-radius: 5px;
+      background: var(--card);
+    }
+
+    .reason {
+      padding: 8px 20px 12px;
+    }
+
+    .reason-row {
+      position: relative;
+    }
+
+    .reason-row input {
+      width: 100%;
+      padding-right: 38px;
+      font: 13px var(--mono);
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding-top: 7px;
+      padding-bottom: 7px;
+      padding-left: 10px;
+      box-sizing: border-box;
+    }
+
+    .reason-row input::placeholder {
+      color: var(--muted);
+    }
+
+    .reason-row input:focus {
+      outline: 2px solid var(--ink);
+      outline-offset: -1px;
+      border-color: transparent;
+    }
+
+    .reason-submit {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: var(--accent-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .reason-submit:hover:not(:disabled) {
+      opacity: .85;
+    }
+
+    .reason-submit:disabled {
+      background: var(--line);
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .reason-view {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font: 13px var(--mono);
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 10px;
+    }
+
+    .reason-view .txt {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .reason-view button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 3px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      height: 26px;
+      line-height: 1;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 80px 0;
+    }
+
+    .done {
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .done h2 {
+      font-weight: 600;
+    }
+
+    .done .fail {
+      color: var(--del-fg);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .completion-wrap {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 480px;
+      background: var(--card);
+      border-radius: 12px;
+    }
+
+    .completion-overlay {
+      text-align: center;
+      animation: completionFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes completionFadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .completion-title-floating {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      animation: floatBreathing 3.5s ease-in-out infinite;
+    }
+
+    @keyframes floatBreathing {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes skelShimmer {
+      0% {
+        background-position: -200% 0;
+        opacity: 0.7;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        background-position: 200% 0;
+        opacity: 0.7;
+      }
+    }
+
+    .skel {
+      background: linear-gradient(90deg, var(--card2) 25%, var(--line) 50%, var(--card2) 75%);
+      background-size: 400% 100%;
+      animation: skelShimmer 1.8s ease-in-out infinite;
+      border-radius: 6px;
+    }
+
+    .apply-success-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 460px;
+      padding: 60px 24px;
+      text-align: center;
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      animation: successFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes successFadeUp {
+      0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .success-checkmark-svg {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 20px;
+    }
+
+    .success-checkmark-svg circle {
+      stroke: var(--add-fg);
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      stroke-width: 2.5;
+      fill: none;
+      animation: checkCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+
+    .success-checkmark-svg path {
+      stroke: var(--add-fg);
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      animation: checkMark 0.4s 0.35s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+
+    @keyframes checkCircle {
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes checkMark {
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .apply-success-title {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .apply-success-sub {
+      margin: 0 0 24px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .close-actions-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .close-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--add-fg);
+      box-shadow: 0 0 8px var(--add-fg);
+      animation: closePulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes closePulse {
+
+      0%,
+      100% {
+        transform: scale(0.9);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
+    }
+
+    .btn-close-now {
+      padding: 3px 10px;
+      font-size: 12px;
+      height: 26px;
+      line-height: 1;
+      border-radius: 6px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    .btn-close-now:hover {
+      background: var(--line);
+    }
+
+    .copy-path-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      color: var(--ink);
+      opacity: 0.75;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .copy-path-btn:hover {
+      opacity: 1;
+      background: var(--card2);
+      border-color: var(--line);
+    }
+
+    .copy-path-btn:active {
+      transform: scale(0.92);
+    }
+
+    .copy-path-btn.copied {
+      opacity: 1;
+      color: var(--ink);
+      background: var(--card2);
+      border-color: var(--line);
+    }
+
+    #update-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 24px;
+      background: #FFFBEB;
+      border-bottom: 1px solid #FDE68A;
+      font-size: 13px;
+      color: #92400E;
+    }
+
+    [data-theme="dark"] #update-banner {
+      background: #1C1508;
+      border-bottom-color: #3D2E00;
+      color: #FDE68A;
+    }
+
+    #update-banner.visible {
+      display: flex;
+    }
+
+    #update-banner .upd-msg {
+      flex: 1;
+    }
+
+    #update-banner .upd-btn {
+      font-size: 12px;
+      padding: 4px 12px;
+      height: 28px;
+      background: #F59E0B;
+      border: 1px solid #D97706;
+      color: #1C1508;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: opacity .15s;
+    }
+
+    #update-banner .upd-btn:hover:not(:disabled) {
+      opacity: .85;
+    }
+
+    #update-banner .upd-btn:disabled {
+      opacity: .55;
+      cursor: default;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Review <span class="brand-pill">TAB</span><span class="ver">v__CR_VERSION__</span></h1>
+    <span class="spacer"></span>
+    <button id="theme" title="Switch light / dark" aria-label="Switch light / dark"></button>
+    <div class="mode-seg" role="group" aria-label="Review mode" data-active-mode="per-request">
+      <div class="mode-thumb"></div>
+      <button type="button" class="mode-seg-btn active" data-value="per-request" aria-pressed="true">Last
+        Prompt</button>
+      <button type="button" class="mode-seg-btn" data-value="accumulate" aria-pressed="false">All Changes</button>
+    </div>
+    <button id="keepAll" class="btn-keep" title="Keep All Changes">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>Keep All
+    </button>
+    <button id="restoreAll" class="btn-restore" title="Restore All Changes">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>Restore All
+    </button>
+    <button class="primary" id="submit">Apply Review</button>
+  </header>
+  <div id="update-banner" role="alert" aria-live="polite">
+    <span class="upd-msg" id="update-msg"></span>
+    <button class="upd-btn" id="update-btn" type="button">Update Now</button>
+  </div>
+  <div class="wrap" id="main">
+    <div class="stats-bar">
+      <div class="skel" style="width:140px;height:24px;border-radius:999px;"></div>
+      <div class="skel" style="width:100px;height:24px;border-radius:999px;"></div>
+      <div class="skel" style="width:120px;height:24px;border-radius:999px;"></div>
+    </div>
+    <div class="layout" style="gap:16px;">
+      <div class="sidebar" style="pointer-events:none;gap:12px;">
+        <div class="stitle" style="padding:12px 14px;">
+          <div class="skel" style="width:100%;height:32px;border-radius:8px;"></div>
+        </div>
+        <div class="sfile-list" style="gap:4px;padding:4px 8px;">
+          <div class="sfile" style="gap:10px;padding:10px 12px;border:none;">
+            <div class="skel" style="width:18px;height:18px;border-radius:4px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <div class="skel" style="width:70%;height:13px;"></div>
+              <div class="skel" style="width:40%;height:10px;opacity:0.5;"></div>
+            </div>
+            <div class="skel" style="width:28px;height:16px;border-radius:4px;"></div>
+          </div>
+          <div class="sfile" style="gap:10px;padding:10px 12px;border:none;">
+            <div class="skel" style="width:18px;height:18px;border-radius:4px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <div class="skel" style="width:55%;height:13px;"></div>
+              <div class="skel" style="width:40%;height:10px;opacity:0.5;"></div>
+            </div>
+            <div class="skel" style="width:28px;height:16px;border-radius:4px;"></div>
+          </div>
+          <div class="sfile" style="gap:10px;padding:10px 12px;border:none;">
+            <div class="skel" style="width:18px;height:18px;border-radius:4px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <div class="skel" style="width:80%;height:13px;"></div>
+              <div class="skel" style="width:40%;height:10px;opacity:0.5;"></div>
+            </div>
+            <div class="skel" style="width:28px;height:16px;border-radius:4px;"></div>
+          </div>
+          <div class="sfile" style="gap:10px;padding:10px 12px;border:none;">
+            <div class="skel" style="width:18px;height:18px;border-radius:4px;flex-shrink:0;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <div class="skel" style="width:60%;height:13px;"></div>
+              <div class="skel" style="width:40%;height:10px;opacity:0.5;"></div>
+            </div>
+            <div class="skel" style="width:28px;height:16px;border-radius:4px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="detail"
+        style="pointer-events:none;gap:16px;padding:24px;background:var(--card);border-radius:12px;border:1px solid var(--line);">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <div class="skel" style="width:45%;height:28px;border-radius:8px;"></div>
+          <div class="skel" style="width:25%;height:28px;border-radius:8px;"></div>
+        </div>
+        <div class="skel" style="width:100%;height:36px;border-radius:8px;margin-top:8px;"></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+          <div class="skel" style="width:85%;height:15px;border-radius:4px;"></div>
+          <div class="skel" style="width:45%;height:15px;border-radius:4px;"></div>
+          <div class="skel" style="width:90%;height:15px;border-radius:4px;"></div>
+          <div class="skel" style="width:70%;height:15px;border-radius:4px;"></div>
+          <div class="skel" style="width:60%;height:15px;border-radius:4px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="confirm-overlay hidden" id="confirmOverlay">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 id="confirmTitle">Apply Review</h2>
+      <div class="confirm-summary" id="confirmSummary"></div>
+      <p class="confirm-msg" id="confirmMsg"></p>
+      <div class="confirm-actions">
+        <button id="confirmCancel">Cancel</button>
+        <button class="primary" id="confirmOk">Apply</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function initTheme() {
+      let t = null;
+      try { t = localStorage.getItem('cr-theme'); } catch (_) { }
+      if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+    const ICON_MOON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+    const ICON_SUN = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+    const ICON_FILE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+    const ICON_CHANGES = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6L2 12l6 6M16 6l6 6-6 6"/></svg>';
+    const ICON_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    const ICON_BOOKMARK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    const ICON_RESTORE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+    const ICON_BOOKMARK_SM = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    const ICON_RESTORE_SM = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+    const ICON_TRASH_SM = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    const ICON_EDIT_SM = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+    const ICON_X = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    const ICON_PARTIAL = '<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 A10 10 0 0 0 12 22 Z" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="10" fill="none"/></svg>';
+    const ICON_CHECK_SM = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    const ICON_CHEV = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    const ICON_SEARCH = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
+    const ICON_FUNNEL = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3z"/></svg>';
+    const ICON_COPY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    function paintThemeBtn() {
+      document.getElementById('theme').innerHTML =
+        document.documentElement.dataset.theme === 'dark' ? ICON_SUN : ICON_MOON;
+    }
+    // Reload fires pagehide too — without this flag the close beacon would fire on version-upgrade
+    // reloads and falsely clear the "tab still open" state.
+    let intentionalReload = false;
+    window.addEventListener('pagehide', () => {
+      if (intentionalReload) return; // reloading on purpose — not a real close
+      try { navigator.sendBeacon('/api/close'); } catch (_) { }
+    });
+
+    window.__crReload = window.__crReload || (() => { intentionalReload = true; location.reload(); });
+
+    document.getElementById('theme').onclick = (e) => {
+      const btn = e.currentTarget;
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      const apply = () => {
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('cr-theme', next); } catch (_) { }
+        paintThemeBtn();
+      };
+
+      // Animate the icon out, swap it, then animate back in
+      btn.classList.add('switching');
+      setTimeout(() => { apply(); btn.classList.remove('switching'); }, 220);
+
+      // View Transitions ripple (Chrome/Edge/Safari 18+)
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced && document.startViewTransition) {
+        const rect = btn.getBoundingClientRect();
+        const x = Math.round(rect.left + rect.width / 2);
+        const y = Math.round(rect.top + rect.height / 2);
+        const maxR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+        const transition = document.startViewTransition(() => {
+          document.documentElement.dataset.theme = next;
+          try { localStorage.setItem('cr-theme', next); } catch (_) { }
+          paintThemeBtn();
+          btn.classList.remove('switching');
+        });
+        transition.ready.then(() => {
+          document.documentElement.animate(
+            { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxR}px at ${x}px ${y}px)`] },
+            { duration: 650, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
+          );
+        });
+        return;
+      }
+
+      // Fallback: add broad CSS transitions for the duration of the swap
+      document.documentElement.classList.add('theme-transition');
+      setTimeout(() => document.documentElement.classList.remove('theme-transition'), 650);
+    };
+    paintThemeBtn();
+
+    let model = null;
+    let currentFileIndex = 0;
+    let sidebarW = 300;
+    const viewedFiles = new Set(); // filePath -> viewed, persists across re-renders (e.g. live refresh)
+    let fileSearch = '';   // sidebar search text, persists across sidebar rebuilds
+    let fileFilter = 'all'; // sidebar status filter: all | kept | partial | restored | viewed | unviewed
+    const collapsedHunks = new Set(); // hunkId -> collapsed; reapplied by paintHunk since it rewrites .hunk's className
+    const lineRej = {};  // hunkId -> Set of rejected line indices (into hunk.lines)
+    const reasons = {};  // hunkId -> string
+    const reasonConfirmed = {}; // hunkId -> bool, true once Enter has "submitted" the reason
+    const changedIdx = {}; // hunkId -> array of indices of +/- lines
+
+    const verEl = document.querySelector('.ver, .ver-tag, .wb-ver .ver, header h1 .ver');
+    const CR_VERSION = verEl ? verEl.textContent.replace('v', '').trim() : '';
+    let pollTimer = null;
+    let currentSig = null;
+
+    function saveViewedFiles() {
+      if (!currentSig) return;
+      try {
+        const key = 'cr-viewed-' + currentSig;
+        const data = JSON.stringify([...viewedFiles]);
+        sessionStorage.setItem(key, data);
+        localStorage.setItem(key, data);
+      } catch (_) { }
+    }
+
+    function loadViewedFiles() {
+      if (!currentSig) return;
+      viewedFiles.clear();
+      try {
+        const key = 'cr-viewed-' + currentSig;
+        const stored = sessionStorage.getItem(key) || localStorage.getItem(key);
+        if (stored) {
+          const arr = JSON.parse(stored);
+          if (Array.isArray(arr)) arr.forEach(f => viewedFiles.add(f));
+        }
+      } catch (_) { }
+    }
+
+    function saveState() {
+      const keys = [];
+      if (currentSig) keys.push('cr-state-' + currentSig);
+      keys.push('cr-state-latest');
+      try {
+        const rejObj = {};
+        for (const hId in lineRej) {
+          if (lineRej[hId] && lineRej[hId].size > 0) {
+            rejObj[hId] = [...lineRej[hId]];
+          }
+        }
+        const payload = JSON.stringify({
+          lineRej: rejObj,
+          reasons,
+          reasonConfirmed
+        });
+        for (const key of keys) {
+          sessionStorage.setItem(key, payload);
+          localStorage.setItem(key, payload);
+        }
+      } catch (_) { }
+    }
+
+    function loadState() {
+      try {
+        const key = currentSig ? ('cr-state-' + currentSig) : 'cr-state-latest';
+        const stored = sessionStorage.getItem(key) || localStorage.getItem(key) || sessionStorage.getItem('cr-state-latest') || localStorage.getItem('cr-state-latest');
+        if (stored) {
+          const { lineRej: rejObj, reasons: savedReasons, reasonConfirmed: savedConfirmed } = JSON.parse(stored);
+          if (rejObj) {
+            for (const hId in rejObj) {
+              if (Array.isArray(rejObj[hId])) {
+                lineRej[hId] = new Set(rejObj[hId]);
+              }
+            }
+          }
+          if (savedReasons) {
+            for (const hId in savedReasons) {
+              reasons[hId] = savedReasons[hId];
+            }
+          }
+          if (savedConfirmed) {
+            for (const hId in savedConfirmed) {
+              reasonConfirmed[hId] = savedConfirmed[hId];
+            }
+          }
+        }
+      } catch (_) { }
+    }
+
+    function clearState() {
+      try {
+        if (currentSig) {
+          sessionStorage.removeItem('cr-state-' + currentSig);
+          localStorage.removeItem('cr-state-' + currentSig);
+        }
+        sessionStorage.removeItem('cr-state-latest');
+        localStorage.removeItem('cr-state-latest');
+      } catch (_) { }
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (currentSig && e.key === 'cr-viewed-' + currentSig) {
+        loadViewedFiles();
+        renderAll();
+      }
+      if (currentSig && e.key === 'cr-state-' + currentSig) {
+        loadState();
+        renderAll();
+      }
+    });
+
+    function setSig(sig) {
+      if (!sig || sig === 'none') return;
+      const changed = currentSig !== sig;
+      currentSig = sig;
+      if (changed) {
+        loadViewedFiles();
+        loadState();
+      }
+    }
+
+    async function startPolling() {
+      const first = await fetch('/api/sig').then(r => r.json()).catch(() => null);
+      if (first && first.sig) {
+        setSig(first.sig);
+        if (first.mode) paintMode(first.mode);
+      }
+      pollTimer = setInterval(pollOnce, 1000);
+      // Immediate poll on visibility-restore to beat background-tab timer throttling.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') pollOnce();
+      });
+    }
+
+    async function pollOnce() {
+      try {
+        const { sig, version, mode, updateAvailable, latestVersion } = await fetch('/api/sig').then(r => r.json());
+        if (version && CR_VERSION && version !== CR_VERSION) {
+          // Server upgraded — reload once to pick up new JS.
+          clearInterval(pollTimer);
+          window.__crReload();
+          return;
+        }
+        if (sig && sig !== 'none' && sig !== currentSig) {
+          setSig(sig);
+          await refresh();
+        } else if (currentSig === null && sig && sig !== 'none') {
+          setSig(sig);
+        }
+        // mode piggybacks the diff poll; skipped while menu is open.
+        if (mode && mode !== currentMode) {
+          paintMode(mode);
+          await refresh();
+        }
+        updateBanner(updateAvailable, latestVersion);
+      } catch (_) { }
+    }
+
+    // Re-fetch and re-render without navigation.
+    async function refresh() {
+      const data = await fetchReview();
+      applyReview(data);
+      toast('Updated with the latest changes');
+    }
+
+    async function fetchReview() {
+      const res = await fetch('/api/review');
+      return res.json();
+    }
+
+    function applyReview(data) {
+      model = data;
+      if (model.error || !model.files || !model.files.length) {
+        document.getElementById('main').innerHTML = '<div class="empty">No changes to review.</div>';
+        return;
+      }
+      for (const k in lineRej) delete lineRej[k];
+      for (const k in changedIdx) delete changedIdx[k];
+      for (const k in reasons) delete reasons[k];
+      for (const k in reasonConfirmed) delete reasonConfirmed[k];
+      for (const f of model.files) for (const h of f.hunks) {
+        lineRej[h.id] = new Set();
+        changedIdx[h.id] = h.lines.map((l, i) => [l, i]).filter(([l]) => l[0] === '+' || l[0] === '-').map(([, i]) => i);
+      }
+      loadState();
+      if (currentFileIndex >= model.files.length) currentFileIndex = 0;
+      renderAll();
+    }
+
+    function toast(msg) {
+      let t = document.getElementById('toast');
+      if (!t) {
+        t = el('div'); t.id = 'toast';
+        t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);'
+          + 'background:var(--ink);color:var(--card);font-size:13px;padding:8px 16px;'
+          + 'border-radius:999px;box-shadow:var(--shadow);opacity:0;transition:opacity .25s;z-index:20;';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(t._h);
+      t._h = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+    }
+
+    const modeSegBtns = [...document.querySelectorAll('.mode-seg-btn')];
+    let currentMode = 'per-request';
+    (function initMode() {
+      let m = null;
+      try { m = localStorage.getItem('cr-mode'); } catch (_) { }
+      if (m && (m === 'per-request' || m === 'accumulate')) {
+        currentMode = m;
+        const seg = document.querySelector('.mode-seg');
+        if (seg) seg.dataset.activeMode = m;
+        modeSegBtns.forEach(btn => {
+          const active = btn.dataset.value === m;
+          btn.classList.toggle('active', active);
+          btn.setAttribute('aria-pressed', String(active));
+        });
+      }
+    })();
+
+    function paintMode(mode) {
+      currentMode = mode;
+      try { localStorage.setItem('cr-mode', mode); } catch (_) { }
+      const seg = document.querySelector('.mode-seg');
+      if (seg) seg.dataset.activeMode = mode;
+      for (const btn of modeSegBtns) {
+        btn.classList.toggle('active', btn.dataset.value === mode);
+        btn.setAttribute('aria-pressed', String(btn.dataset.value === mode));
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      // Sidebar filter dropdown is rebuilt dynamically, so close it via one
+      // shared listener rather than re-registering a handler on every rebuild.
+      const dd = document.querySelector('.filter-dd');
+      if (dd && dd._closeMenu && !dd.contains(e.target)) dd._closeMenu();
+    });
+
+    for (const btn of modeSegBtns) {
+      btn.onclick = () => selectMode(btn.dataset.value);
+    }
+
+    async function selectMode(mode) {
+      if (mode === currentMode) return;
+      const prev = currentMode;
+      paintMode(mode);
+      const main = document.getElementById('main');
+      // Phase 1: dim the old content while the server recomputes the diff.
+      // The user can still see what was there — no white blank.
+      main.classList.add('mode-loading');
+      try {
+        const res = await fetch('/api/mode', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await fetchReview(); // fetch new data while old content is still (dimly) visible
+        // Phase 2: quick swap now that data is ready — only invisible for ~150ms.
+        main.classList.remove('mode-loading');
+        main.classList.add('mode-switching');
+        await new Promise(r => setTimeout(r, 150));
+        applyReview(data);
+        requestAnimationFrame(() => main.classList.remove('mode-switching'));
+        toast(mode === 'accumulate' ? 'Now showing every uncommitted change in the project' : 'Now showing only the latest prompt\'s changes');
+      } catch (_) {
+        main.classList.remove('mode-loading', 'mode-switching');
+        paintMode(prev);
+        toast("Couldn't save mode — try again");
+      }
+    }
+
+    async function loadMode() {
+      try {
+        const { mode } = await fetch('/api/mode').then(r => r.json());
+        if (mode && mode !== currentMode) paintMode(mode);
+      } catch (_) { }
+    }
+
+    function buildSkeletonLoader() {
+      const skelFiles = [70, 55, 80, 60, 75];
+      const skelCode = [85, 45, 90, 70, 60, 80, 50, 75];
+      return '<div class="stats-bar">'
+        + '<div class="skel" style="width:140px;height:24px;border-radius:999px;"></div>'
+        + '<div class="skel" style="width:100px;height:24px;border-radius:999px;"></div>'
+        + '<div class="skel" style="width:120px;height:24px;border-radius:999px;"></div>'
+        + '</div>'
+        + '<div class="layout" style="gap:16px;">'
+        + '<div class="sidebar" style="pointer-events:none;gap:12px;">'
+        + '<div class="stitle" style="padding:12px 14px;"><div class="skel" style="width:100%;height:32px;border-radius:8px;"></div></div>'
+        + '<div class="sfile-list" style="gap:4px;padding:4px 8px;">'
+        + skelFiles.map(w =>
+          '<div class="sfile" style="gap:10px;padding:10px 12px;border:none;">'
+          + '<div class="skel" style="width:18px;height:18px;border-radius:4px;flex-shrink:0;"></div>'
+          + '<div style="flex:1;display:flex;flex-direction:column;gap:6px;">'
+          + '<div class="skel" style="width:' + w + '%;height:13px;"></div>'
+          + '<div class="skel" style="width:40%;height:10px;opacity:0.5;"></div>'
+          + '</div>'
+          + '<div class="skel" style="width:28px;height:16px;border-radius:4px;"></div>'
+          + '</div>'
+        ).join('')
+        + '</div>'
+        + '</div>'
+        + '<div class="detail" style="pointer-events:none;gap:16px;padding:24px;background:var(--card);border-radius:12px;border:1px solid var(--line);">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;width:100%;">'
+        + '<div class="skel" style="width:45%;height:28px;border-radius:8px;"></div>'
+        + '<div class="skel" style="width:25%;height:28px;border-radius:8px;"></div>'
+        + '</div>'
+        + '<div class="skel" style="width:100%;height:36px;border-radius:8px;margin-top:8px;"></div>'
+        + '<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">'
+        + skelCode.map(w =>
+          '<div class="skel" style="width:' + w + '%;height:15px;border-radius:4px;"></div>'
+        ).join('')
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }
+
+    async function load() {
+      const [firstSig, res] = await Promise.all([
+        fetch('/api/sig').then(r => r.json()).catch(() => null),
+        fetch('/api/review').then(r => r.json()).catch(() => null),
+        loadMode()
+      ]);
+      if (firstSig && firstSig.sig) setSig(firstSig.sig);
+      model = res;
+      const main = document.getElementById('main');
+      if (!model || model.error) { if (main) main.innerHTML = '<div class="empty">' + esc(model?.error || 'No changes to review.') + '</div>'; startPolling(); return; }
+      if (!model.files.length) { if (main) main.innerHTML = '<div class="empty">No changes to review.</div>'; startPolling(); return; }
+      applyReview(model);
+      startPolling();
+    }
+
+    function splitPath(filePath) {
+      const idx = filePath.lastIndexOf('/');
+      return idx === -1 ? { name: filePath, dir: '' } : { name: filePath.slice(idx + 1), dir: filePath.slice(0, idx) };
+    }
+
+    function makeResizeHandle() {
+      const handle = el('div', 'resize-handle');
+      const dots = el('div', 'rh-dots');
+      dots.append(el('span', ''), el('span', ''), el('span', ''));
+      handle.appendChild(dots);
+      handle.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const sidebar = handle.closest('.layout').querySelector('.sidebar');
+        const startX = e.clientX, startW = sidebar.getBoundingClientRect().width;
+        handle.classList.add('dragging');
+        document.body.style.cssText += ';cursor:col-resize!important;user-select:none!important';
+        const onMove = e => {
+          const w = Math.max(180, Math.min(600, startW + e.clientX - startX));
+          sidebar.style.width = w + 'px';
+          sidebarW = w;
+        };
+        const onUp = () => {
+          handle.classList.remove('dragging');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+      return handle;
+    }
+
+    let showingCompletion = false;
+
+    function isAllViewed() {
+      return model && model.files && model.files.length > 0 && model.files.every(f => viewedFiles.has(f.filePath));
+    }
+
+    function buildCompletionView() {
+      const detail = el('div', 'detail completion-wrap');
+      const overlay = el('div', 'completion-overlay');
+      overlay.innerHTML = '<h2 class="completion-title-floating">You made it to the end!</h2>';
+      detail.appendChild(overlay);
+      return detail;
+    }
+
+    function renderAll() {
+      const main = document.getElementById('main');
+      const oldSidebar = main.querySelector('.sidebar');
+      const oldScroll = oldSidebar ? (oldSidebar.querySelector('.sfile-list')?.scrollTop || 0) : 0;
+      main.innerHTML = '';
+      main.appendChild(buildStats());
+      const layout = el('div', 'layout');
+      const newSidebar = buildSidebar();
+      layout.appendChild(newSidebar);
+      if (oldScroll) {
+        const list = newSidebar.querySelector('.sfile-list');
+        if (list) list.scrollTop = oldScroll;
+      }
+      layout.appendChild(makeResizeHandle());
+      const useCompletion = showingCompletion && isAllViewed();
+      const detailPane = useCompletion
+        ? buildCompletionView()
+        : buildDetail(model.files[currentFileIndex]);
+      layout.appendChild(detailPane);
+      main.appendChild(layout);
+      if (!useCompletion) {
+        for (const h of model.files[currentFileIndex].hunks) paintHunk(h);
+      }
+      tally();
+    }
+
+    function buildStats() {
+      const wrap = el('div', 'stats');
+      let changes = 0, kept = 0, partial = 0, restored = 0;
+      for (const f of model.files) for (const h of f.hunks) {
+        changes++;
+        const s = lineRej[h.id].size, total = changedIdx[h.id].length;
+        if (s === total && total > 0) restored++;
+        else if (s === 0) kept++;
+        else partial++;
+      }
+      const tiles = [
+        ['files', ICON_FILE, model.files.length, 'Files'],
+        ['changes', ICON_CHANGES, changes, 'Changes'],
+        ['kept', ICON_BOOKMARK, kept, 'Kept'],
+        ['partial', ICON_PARTIAL, partial, 'Partial'],
+        ['restored', ICON_RESTORE, restored, 'Restored'],
+      ];
+      for (const [cls, icon, num, lbl] of tiles) {
+        const tile = el('div', 'stat ' + cls);
+        tile.innerHTML = '<div><div class="num">' + num + '</div><div class="lbl">' + lbl + '</div></div>'
+          + '<div class="badge">' + icon + '</div>';
+        wrap.appendChild(tile);
+      }
+      return wrap;
+    }
+
+    // Derive a file's overall status from its hunks: a file is 'kept' when nothing is
+    // restored, 'restored' when every change is restored, else 'partial' (mixed).
+    function getFileStatus(f) {
+      let anyRej = false, allRej = true;
+      for (const h of f.hunks) {
+        const s = lineRej[h.id].size, total = changedIdx[h.id].length;
+        if (s > 0) anyRej = true;
+        if (!(s === total && total > 0)) allRej = false;
+      }
+      if (!anyRej) return 'kept';
+      if (allRej) return 'restored';
+      return 'partial';
+    }
+
+    // Whether a file passes the current search text AND the active status filter.
+    function fileMatches(f) {
+      const q = fileSearch.trim().toLowerCase();
+      if (q && !f.filePath.toLowerCase().includes(q)) return false;
+      switch (fileFilter) {
+        case 'viewed': return viewedFiles.has(f.filePath);
+        case 'unviewed': return !viewedFiles.has(f.filePath);
+        case 'kept':
+          return f.hunks.some(function (h) {
+            const s = lineRej[h.id] ? lineRej[h.id].size : 0;
+            const total = changedIdx[h.id] ? changedIdx[h.id].length : 0;
+            return s < total;
+          });
+        case 'restored':
+          return f.hunks.some(function (h) {
+            const s = lineRej[h.id] ? lineRej[h.id].size : 0;
+            const total = changedIdx[h.id] ? changedIdx[h.id].length : 0;
+            return s === total && total > 0;
+          });
+        case 'partial':
+          return getFileStatus(f) === 'partial';
+        default: return true; // 'all'
+      }
+    }
+
+    const FILTER_OPTS = [
+      ['all', 'All'], ['kept', 'Kept'], ['partial', 'Partial'], ['restored', 'Restored'],
+      ['viewed', 'Viewed'], ['unviewed', 'Unviewed'],
+    ];
+
+    // Rebuild only file rows; rebuilding the header would blur the search input.
+    function renderFileList(sidebar) {
+      const list = sidebar.querySelector('.sfile-list');
+      const matches = model.files.map((f, i) => [f, i]).filter(([f]) => fileMatches(f));
+      list.innerHTML = '';
+      const count = sidebar.querySelector('.sfile-count');
+      if (count) count.textContent = matches.length;
+
+      if (matches.length === 0) {
+        const empty = el('div', 'sfile-empty');
+        empty.textContent = 'No files match';
+        list.appendChild(empty);
+        return;
+      }
+
+      for (const [f, i] of matches) {
+        const { name, dir } = splitPath(f.filePath);
+        const row = el('div', 'sfile' + (i === currentFileIndex ? ' current' : ''));
+        const isViewed = viewedFiles.has(f.filePath);
+        row.innerHTML = '<span class="sfile-icon ' + (isViewed ? 'viewed' : 'pending') + '">' + (isViewed ? ICON_CHECK_SM : '') + '</span>'
+          + '<span class="sfile-info"><div class="sfile-name">' + esc(name) + '</div>'
+          + (dir ? '<div class="sfile-dir">' + esc(dir) + '</div>' : '') + '</span>';
+        row.onclick = () => goToFile(i);
+        list.appendChild(row);
+      }
+    }
+
+    function buildSidebar() {
+      const aside = el('div', 'sidebar');
+      aside.style.width = sidebarW + 'px';
+
+      const head = el('div', 'sidebar-head');
+      const filterItems = FILTER_OPTS.map(function (opt) {
+        return '<div class="filter-dd-item" role="option" data-value="' + opt[0] + '" tabindex="0">'
+          + '<span class="fdi-check">' + ICON_CHECK_SM + '</span>'
+          + '<span class="fdi-label">' + opt[1] + '</span></div>';
+      }).join('');
+      head.innerHTML = '<div class="sidebar-project" title="Active Project Folder">'
+        + '<svg class="project-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>'
+        + '<span class="project-name">__CR_PROJECT__</span></div>'
+        + '<div class="sidebar-section-divider"></div>'
+        + '<div class="sidebar-files-header">'
+        + '<div class="sf-title">Files (<span class="sfile-count"></span>)</div>'
+        + '<div class="sf-tools">'
+        + '<div class="sf-search"><span class="sf-search-icon">' + ICON_SEARCH + '</span>'
+        + '<input type="text" placeholder="Search files... (Ctrl+K)" aria-label="Search files">'
+        + '<button class="sf-clear" aria-label="Clear search" title="Clear search" hidden>' + ICON_X + '</button></div>'
+        + '<div class="filter-dd">'
+        + '<button class="filter-dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter files" title="Filter files">' + ICON_FUNNEL + '</button>'
+        + '<div class="filter-dd-menu" role="listbox" aria-label="Filter files">' + filterItems + '</div>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+      aside.appendChild(head);
+
+      const list = el('div', 'sfile-list');
+      aside.appendChild(list);
+
+      // Seed value from state so it survives sidebar rebuilds without blurring.
+      const search = head.querySelector('.sf-search input');
+      const clearBtn = head.querySelector('.sf-clear');
+      search.value = fileSearch;
+      clearBtn.hidden = !fileSearch.trim();
+      search.oninput = () => {
+        fileSearch = search.value;
+        clearBtn.hidden = !fileSearch.trim();
+        renderFileList(aside);
+      };
+      clearBtn.onclick = () => {
+        fileSearch = '';
+        search.value = '';
+        clearBtn.hidden = true;
+        renderFileList(aside);
+        search.focus();
+      };
+
+      const dd = head.querySelector('.filter-dd');
+      const ddBtn = head.querySelector('.filter-dd-btn');
+      const ddMenu = head.querySelector('.filter-dd-menu');
+      ddBtn.classList.toggle('active', fileFilter !== 'all');
+      for (const item of ddMenu.querySelectorAll('.filter-dd-item')) {
+        item.classList.toggle('selected', item.dataset.value === fileFilter);
+        item.setAttribute('aria-selected', String(item.dataset.value === fileFilter));
+        item.onclick = () => {
+          fileFilter = item.dataset.value;
+          for (const it of ddMenu.querySelectorAll('.filter-dd-item')) {
+            it.classList.toggle('selected', it === item);
+            it.setAttribute('aria-selected', String(it === item));
+          }
+          ddBtn.classList.toggle('active', fileFilter !== 'all');
+          ddMenu.classList.remove('open');
+          ddBtn.setAttribute('aria-expanded', 'false');
+          renderFileList(aside);
+        };
+      }
+      ddBtn.onclick = () => {
+        const open = ddMenu.classList.toggle('open');
+        ddBtn.setAttribute('aria-expanded', String(open));
+      };
+      dd._closeMenu = () => { ddMenu.classList.remove('open'); ddBtn.setAttribute('aria-expanded', 'false'); };
+
+      renderFileList(aside);
+      return aside;
+    }
+
+    function goToFile(index) {
+      const isCompletionVisible = showingCompletion;
+      showingCompletion = false;
+      if (index < 0 || index >= model.files.length) return;
+      if (index === currentFileIndex && !isCompletionVisible) return;
+      currentFileIndex = index;
+      const main = document.getElementById('main');
+      const oldDetail = main.querySelector('.detail');
+      let rebuilt = false;
+      const rebuild = () => {
+        if (rebuilt) return; // animationend and 250ms fallback — whichever fires first
+        rebuilt = true;
+        const layout = main.querySelector('.layout');
+        const newDetail = buildDetail(model.files[currentFileIndex]);
+        newDetail.classList.add('slide-in');
+        if (oldDetail) layout.replaceChild(newDetail, oldDetail); else layout.appendChild(newDetail);
+        for (const h of model.files[currentFileIndex].hunks) paintHunk(h);
+        // Rebuild sidebar to update "current" highlight.
+        const oldSidebar = layout.querySelector('.sidebar');
+        const oldScroll = oldSidebar ? (oldSidebar.querySelector('.sfile-list')?.scrollTop || 0) : 0;
+        const newSidebar = buildSidebar();
+        layout.replaceChild(newSidebar, oldSidebar);
+        const list = newSidebar.querySelector('.sfile-list');
+        if (list && oldScroll) list.scrollTop = oldScroll;
+        // Scroll the selected row into view within the sidebar list.
+        const cur = newSidebar.querySelector('.sfile.current');
+        if (cur) cur.scrollIntoView({ block: 'nearest' });
+      };
+      if (oldDetail) {
+        oldDetail.classList.add('slide-out');
+        oldDetail.addEventListener('animationend', rebuild, { once: true });
+        // Fallback if animationend never fires (reduced-motion, env quirks).
+        setTimeout(rebuild, 250);
+      } else {
+        rebuild();
+      }
+    }
+
+    function buildDetail(f) {
+      const detail = el('div', 'detail');
+      const { name, dir } = splitPath(f.filePath);
+      const head = el('div', 'dhead');
+      head.innerHTML = '<span class="ficon">' + ICON_FILE + '</span>'
+        + '<span class="fmeta"><div class="fname">' + esc(name) + '</div>'
+        + (dir ? '<div class="fdir">' + esc(dir) + '</div>' : '') + '</span>'
+        + '<button type="button" class="copy-path-btn" aria-label="Copy file path" title="Copy file path">'
+        + ICON_COPY + '</button>';
+      head.querySelector('.copy-path-btn').onclick = (e) => copyFilePath(f.filePath, e.currentTarget);
+      detail.appendChild(head);
+
+      const dstats = el('div', 'dstats');
+      dstats.innerHTML = '<span class="plus">+' + f.additions + '</span>'
+        + '<span class="minus">\u2212' + f.deletions + '</span>'
+        + '<span class="fileacts"><button class="btn-keep" data-f="acc">' + ICON_BOOKMARK_SM + 'Keep</button>'
+        + '<button class="btn-restore" data-f="rej">' + ICON_RESTORE_SM + 'Restore</button>'
+        + '<label class="viewed-toggle"><input type="checkbox" data-f="viewed"' + (viewedFiles.has(f.filePath) ? ' checked' : '') + '> Viewed</label></span>';
+      dstats.querySelector('[data-f="acc"]').onclick = (e) => { pulseBtn(e.currentTarget, 'keep'); for (const h of f.hunks) setHunk(h, false); };
+      dstats.querySelector('[data-f="rej"]').onclick = (e) => { pulseBtn(e.currentTarget, 'restore'); for (const h of f.hunks) setHunk(h, true); };
+      dstats.querySelector('[data-f="viewed"]').onchange = (e) => {
+        if (e.target.checked) markViewed(f);
+        else { viewedFiles.delete(f.filePath); showingCompletion = false; saveViewedFiles(); renderAll(); } // unchecking is a correction — stay put, don't navigate away
+      };
+      detail.appendChild(dstats);
+
+      let hunkNum = 0;
+      for (const h of f.hunks) {
+        hunkNum++;
+        const hunkEl = el('div', 'hunk' + (collapsedHunks.has(h.id) ? ' collapsed' : ''));
+        hunkEl.id = h.id;
+        const bar = el('div', 'hunkbar');
+        const showHunkActs = f.hunks.length > 1; // single-hunk files: file-level buttons already cover it
+        bar.innerHTML = '<span class="hunk-toggle" role="button" tabindex="0" aria-label="Collapse hunk">'
+          + '<span class="hunk-chev">' + ICON_CHEV + '</span>'
+          + '<span class="hunk-title">Hunk ' + hunkNum + '</span>'
+          + '<span class="hunk-range">' + hunkRangeLabel(h) + '</span>'
+          + '<span class="st"></span></span>'
+          + (showHunkActs
+            ? '<span class="acts"><button class="btn-keep" data-a="acc">' + ICON_BOOKMARK_SM + 'Keep</button>'
+            + '<button class="btn-restore" data-a="rej">' + ICON_RESTORE_SM + 'Restore</button></span>'
+            : '');
+        bar.querySelector('.hunk-toggle').onclick = () => toggleHunkCollapse(h);
+        if (showHunkActs) {
+          bar.querySelector('[data-a="acc"]').onclick = (e) => { pulseBtn(e.currentTarget, 'keep'); setHunk(h, false); };
+          bar.querySelector('[data-a="rej"]').onclick = (e) => { pulseBtn(e.currentTarget, 'restore'); setHunk(h, true); };
+        }
+        hunkEl.appendChild(bar);
+
+        const pre = el('pre');
+        let oldLn = h.oldStart != null ? h.oldStart : 1;
+        let newLn = h.newStart != null ? h.newStart : 1;
+        let i = 0;
+        while (i < h.lines.length) {
+          const l = h.lines[i];
+          const changed = (l[0] === '+' || l[0] === '-') && !l.startsWith('\\');
+          if (!changed) {
+            pre.appendChild(lineSpan(h, i, false, oldLn, newLn));
+            if (!l.startsWith('\\')) { oldLn++; newLn++; }
+            i++;
+            continue;
+          }
+          const seg = el('div', 'seg');
+          const segIdx = [];
+          while (i < h.lines.length && (h.lines[i][0] === '+' || h.lines[i][0] === '-' || h.lines[i].startsWith('\\'))) {
+            if (!h.lines[i].startsWith('\\')) {
+              const isAdd = h.lines[i][0] === '+';
+              seg.appendChild(lineSpan(h, i, true, isAdd ? null : oldLn, isAdd ? newLn : null));
+              segIdx.push(i);
+              if (isAdd) newLn++; else oldLn++;
+            }
+            i++;
+          }
+          const segbar = el('div', 'segbar');
+          const keep = el('button', 'btn-keep'); keep.innerHTML = ICON_BOOKMARK_SM + 'Keep';
+          const rev = el('button', 'btn-restore'); rev.innerHTML = ICON_RESTORE_SM + 'Restore';
+          keep.onclick = (e) => {
+            e.stopPropagation();
+            const before = rejSnapshot(h);
+            segIdx.forEach(x => lineRej[h.id].delete(x));
+            paintHunk(h); tally();
+            if (rejSnapshot(h) === before) pulseHunk(h, 'keep');
+          };
+          rev.onclick = (e) => {
+            e.stopPropagation();
+            const before = rejSnapshot(h);
+            segIdx.forEach(x => lineRej[h.id].add(x));
+            paintHunk(h); tally();
+            if (rejSnapshot(h) === before) pulseHunk(h, 'restore');
+          };
+          segbar.appendChild(keep); segbar.appendChild(rev);
+          seg.appendChild(segbar);
+          pre.appendChild(seg);
+        }
+        hunkEl.appendChild(pre);
+
+        const reason = el('div', 'reason');
+        reason.style.display = 'none';
+        renderReasonBox(h, reason);
+        hunkEl.appendChild(reason);
+
+        detail.appendChild(hunkEl);
+      }
+      return detail;
+    }
+
+    // Human-readable alternative to raw "@@ -a,b +c,d @@" unified-diff syntax.
+    function hunkRangeLabel(h) {
+      const start = h.newStart != null ? h.newStart : 1;
+      const span = Math.max(h.additions || 0, h.deletions || 0, 1);
+      return 'Lines ' + start + '\u2013' + (start + span - 1);
+    }
+
+    function markViewed(f) {
+      viewedFiles.add(f.filePath);
+      saveViewedFiles();
+      // Advance to next unviewed file, wrapping around so out-of-order review still lands on unread files.
+      for (let step = 1; step <= model.files.length; step++) {
+        const idx = (currentFileIndex + step) % model.files.length;
+        if (!viewedFiles.has(model.files[idx].filePath)) { goToFile(idx); return; }
+      }
+      showingCompletion = true;
+      toast('🎉 All files reviewed! Ready to apply.');
+      renderAll(); // everything is viewed — show completion screen and celebratory toast
+    }
+
+    function rejSnapshot(h) {
+      return [...lineRej[h.id]].sort((a, b) => a - b).join(',');
+    }
+
+    function toggleLine(h, i) {
+      const before = rejSnapshot(h);
+      const s = lineRej[h.id];
+      s.has(i) ? s.delete(i) : s.add(i);
+      paintHunk(h); tally();
+      if (rejSnapshot(h) === before) pulseHunk(h);
+    }
+
+    function setHunk(h, restoreAll) {
+      const before = rejSnapshot(h);
+      lineRej[h.id] = restoreAll ? new Set(changedIdx[h.id]) : new Set();
+      paintHunk(h); tally();
+      if (rejSnapshot(h) === before) pulseHunk(h, restoreAll ? 'restore' : 'keep');
+    }
+
+    function toggleHunkCollapse(h) {
+      if (collapsedHunks.has(h.id)) collapsedHunks.delete(h.id);
+      else collapsedHunks.add(h.id);
+      const hunkEl = document.getElementById(h.id);
+      if (hunkEl) hunkEl.classList.toggle('collapsed', collapsedHunks.has(h.id));
+    }
+
+    // Pulse only on no-ops; genuine transitions already have color-change feedback.
+    function pulseHunk(h, type) {
+      const el = document.getElementById(h.id);
+      if (!el) return;
+      el.classList.remove('pulse', 'pulse-keep', 'pulse-restore', 'pulse-default');
+      void el.offsetWidth; // force reflow to re-trigger the animation
+      const cls = type === 'keep' ? 'pulse-keep' : type === 'restore' ? 'pulse-restore' : 'pulse-default';
+      el.classList.add(cls);
+      setTimeout(() => el.classList.remove('pulse', 'pulse-keep', 'pulse-restore', 'pulse-default'), 600);
+    }
+
+    function pulseBtn(btn, type) {
+      if (!btn) return;
+      btn.classList.remove('pulse-btn-keep', 'pulse-btn-restore');
+      void btn.offsetWidth;
+      btn.classList.add(type === 'restore' ? 'pulse-btn-restore' : 'pulse-btn-keep');
+      setTimeout(() => btn.classList.remove('pulse-btn-keep', 'pulse-btn-restore'), 450);
+    }
+
+    function copyFilePath(filePath, btn) {
+      const doneIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>';
+      const showDone = () => {
+        btn.classList.add('copied');
+        btn.innerHTML = doneIcon;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = ICON_COPY;
+        }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(filePath).then(showDone).catch(() => fallbackCopy(filePath, showDone));
+      } else {
+        fallbackCopy(filePath, showDone);
+      }
+    }
+
+    function fallbackCopy(text, then) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) { }
+      document.body.removeChild(ta);
+      then();
+    }
+
+    // Two modes: editable input (default/after Edit) or read-only view with Edit/Delete after Enter.
+    // Enter only confirms this field — never triggers Apply.
+    function renderReasonBox(h, reasonDiv) {
+      reasonDiv.innerHTML = '';
+      if (reasonConfirmed[h.id] && reasons[h.id]) {
+        const view = el('div', 'reason-view');
+        const txt = el('span', 'txt');
+        txt.textContent = reasons[h.id];
+        txt.title = reasons[h.id];
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = ICON_EDIT_SM + 'Edit';
+        editBtn.onclick = () => { reasonConfirmed[h.id] = false; saveState(); renderReasonBox(h, reasonDiv); };
+        const delBtn = document.createElement('button');
+        delBtn.innerHTML = ICON_TRASH_SM + 'Delete';
+        delBtn.onclick = () => { reasons[h.id] = ''; reasonConfirmed[h.id] = false; saveState(); renderReasonBox(h, reasonDiv); };
+        view.appendChild(txt); view.appendChild(editBtn); view.appendChild(delBtn);
+        reasonDiv.appendChild(view);
+      } else {
+        const row = el('div', 'reason-row');
+        const inp = document.createElement('input');
+        inp.placeholder = 'Why? This goes back to Claude as feedback (optional)';
+        inp.value = reasons[h.id] || '';
+        const submitBtn = document.createElement('button');
+        submitBtn.className = 'reason-submit';
+        submitBtn.type = 'button';
+        submitBtn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+        submitBtn.title = 'Submit reason (or press Enter)';
+        submitBtn.disabled = !inp.value.trim();
+
+        // Shared confirm path for Enter key and button click.
+        const confirm = () => {
+          if (!inp.value.trim()) { inp.blur(); return; }
+          reasonConfirmed[h.id] = true;
+          saveState();
+          renderReasonBox(h, reasonDiv);
+        };
+
+        inp.oninput = () => {
+          reasons[h.id] = inp.value;
+          submitBtn.disabled = !inp.value.trim();
+          saveState();
+        };
+        inp.onkeydown = (e) => {
+          if (e.key !== 'Enter') return;
+          e.preventDefault(); // don't bubble into page-level Apply
+          confirm();
+        };
+        submitBtn.onclick = confirm;
+
+        row.appendChild(inp);
+        row.appendChild(submitBtn);
+        reasonDiv.appendChild(row);
+      }
+    }
+
+    function paintHunk(h) {
+      const hunkEl = document.getElementById(h.id);
+      if (!hunkEl) return; // not in the current detail pane
+      const s = lineRej[h.id], total = changedIdx[h.id].length;
+      hunkEl.querySelectorAll('pre .l').forEach(sp => {
+        if (sp.dataset.i === undefined) return;
+        const flagged = s.has(+sp.dataset.i);
+        // '+' rejected → struck through. '-' rejected → restoring (must look kept, not erased).
+        sp.classList.toggle('rej', flagged && sp.classList.contains('a'));
+        sp.classList.toggle('restoring', flagged && sp.classList.contains('d'));
+      });
+      const state = s.size === 0 ? 'kept' : s.size === total ? 'restored' : 'partial';
+      hunkEl.className = 'hunk ' + state + (collapsedHunks.has(h.id) ? ' collapsed' : '');
+      hunkEl.querySelector('.st').textContent =
+        state === 'kept' ? '' : state === 'restored' ? 'restored' : s.size + ' of ' + total + ' lines restoring';
+      const reasonDiv = hunkEl.querySelector('.reason');
+      reasonDiv.style.display = s.size ? '' : 'none';
+      if (s.size === 0 && (reasons[h.id] || reasonConfirmed[h.id])) {
+        // Clear reason when keeping: prevents stale text from a prior rejection reaching Claude.
+        reasons[h.id] = '';
+        reasonConfirmed[h.id] = false;
+        renderReasonBox(h, reasonDiv);
+      }
+    }
+
+    function tally() {
+      let total = 0, rej = 0, partial = 0;
+      for (const id in changedIdx) {
+        total++;
+        const s = lineRej[id].size;
+        if (s === changedIdx[id].length && s > 0) rej++;
+        else if (s > 0) partial++;
+      }
+      saveState();
+      const statsEl = document.querySelector('.stats');
+      if (statsEl) { statsEl.replaceWith(buildStats()); }
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) renderFileList(sidebar);
+    }
+
+    function showApplyConfirm() {
+      let totalFiles = model.files.length, kept = 0, partial = 0, restored = 0;
+      for (const f of model.files) for (const h of f.hunks) {
+        const s = lineRej[h.id].size, total = changedIdx[h.id].length;
+        if (s === total && total > 0) restored++;
+        else if (s === 0) kept++;
+        else partial++;
+      }
+      const summary = document.getElementById('confirmSummary');
+      summary.innerHTML =
+        '<div class="cs-tile cs-files" data-filter="all" title="Click to view all files"><div class="cs-num">' + totalFiles + '</div><div class="cs-lbl">Files</div></div>' +
+        '<div class="cs-tile cs-kept" data-filter="kept" title="Click to filter by kept files"><div class="cs-num">' + kept + '</div><div class="cs-lbl">Kept</div></div>' +
+        '<div class="cs-tile cs-partial" data-filter="partial" title="Click to filter by partially kept files"><div class="cs-num">' + partial + '</div><div class="cs-lbl">Partial</div></div>' +
+        '<div class="cs-tile cs-restored" data-filter="restored" title="Click to filter by restored files"><div class="cs-num">' + restored + '</div><div class="cs-lbl">Restored</div></div>';
+
+      summary.querySelectorAll('.cs-tile').forEach(function(tile) {
+        tile.onclick = function() {
+          const filterType = tile.getAttribute('data-filter');
+          fileFilter = filterType;
+          closeConfirmModal();
+          const matches = model.files.map((f, i) => [f, i]).filter(([f]) => fileMatches(f));
+          if (matches.length > 0 && !matches.some(([, i]) => i === currentFileIndex)) {
+            currentFileIndex = matches[0][1];
+          }
+          renderAll();
+        };
+      });
+
+      const fileWord = totalFiles === 1 ? 'file' : 'files';
+      let msg;
+      if (restored === 0 && partial === 0) {
+        msg = 'All changes across <strong>' + totalFiles + ' ' + fileWord + '</strong> will be kept.';
+      } else if (kept === 0 && partial === 0) {
+        msg = 'All <strong>' + restored + ' change' + (restored === 1 ? '' : 's') + '</strong> across <strong>' + totalFiles + ' ' + fileWord + '</strong> will be restored.';
+      } else {
+        const parts = [];
+        if (kept > 0) parts.push('<strong>' + kept + ' change' + (kept === 1 ? '' : 's') + '</strong> kept');
+        if (partial > 0) parts.push('<strong>' + partial + '</strong> partially restored');
+        if (restored > 0) parts.push('<strong>' + restored + '</strong> fully restored');
+        msg = parts.join(', ') + ' across <strong>' + totalFiles + ' ' + fileWord + '</strong>.';
+      }
+      document.getElementById('confirmMsg').innerHTML = msg;
+      document.body.classList.add('modal-open');
+      document.getElementById('confirmOverlay').classList.remove('hidden');
+      document.getElementById('confirmOk').focus();
+    }
+
+    function closeConfirmModal() {
+      document.body.classList.remove('modal-open');
+      document.getElementById('confirmOverlay').classList.add('hidden');
+    }
+
+    async function submit() {
+      document.getElementById('confirmOverlay').classList.add('hidden');
+      if (pollTimer) clearInterval(pollTimer);
+      const btn = document.getElementById('submit');
+      btn.disabled = true; btn.textContent = 'Applying\u2026';
+      const selections = {};
+      let count = 0;
+      for (const id in lineRej) {
+        if (lineRej[id].size) { selections[id] = { lines: [...lineRej[id]] }; count++; }
+      }
+      const res = await fetch('/api/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selections, reasons })
+      });
+      const out = await res.json();
+      clearState();
+      const fails = (out.results || []).filter(r => !r.ok);
+      btn.textContent = 'Applied ✓';
+      document.getElementById('keepAll').style.display = 'none';
+      document.getElementById('restoreAll').style.display = 'none';
+
+      const successSvg = '<svg class="success-checkmark-svg" viewBox="0 0 52 52">'
+        + '<circle cx="26" cy="26" r="25"/>'
+        + '<path d="M14 27l7 7 16-16"/>'
+        + '</svg>';
+
+      document.getElementById('main').innerHTML = '<div class="apply-success-wrap">'
+        + successSvg
+        + '<h2 class="apply-success-title">Review Applied!</h2>'
+        + '<p class="apply-success-sub">' + (fails.length ? 'Changes applied. Some files changed externally.' : 'All review selections saved successfully.') + '</p>'
+        + '</div>';
+
+      setTimeout(() => { window.close(); }, 1700);
+    }
+
+    function lineSpan(h, i, clickable, oldLn, newLn) {
+      const l = h.lines[i];
+      const cls = l[0] === '+' ? 'a' : l[0] === '-' ? 'd' : 'c';
+      const span = el('span', 'l ' + cls);
+      const gutter = el('span', 'gutter');
+      gutter.innerHTML = '<span>' + (oldLn != null ? oldLn : '') + '</span><span>' + (newLn != null ? newLn : '') + '</span>';
+      span.appendChild(gutter);
+      const txt = el('span', 'txt');
+      txt.textContent = l || ' ';
+      span.appendChild(txt);
+      if (clickable) {
+        span.title = 'Click to restore just this line';
+        span.onclick = () => toggleLine(h, i);
+        span.dataset.i = i;
+      }
+      return span;
+    }
+
+    function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+    function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+    function updateBanner(available, latestVersion) {
+      const banner = document.getElementById('update-banner');
+      const msg = document.getElementById('update-msg');
+      if (!banner) return;
+      if (!available) { banner.classList.remove('visible'); return; }
+      if (banner.classList.contains('visible')) return; // already shown, don't reset mid-update
+      msg.textContent = 'Review Tab v' + latestVersion + ' is available.';
+      banner.classList.add('visible');
+    }
+
+    document.getElementById('update-btn').onclick = async () => {
+      const btn = document.getElementById('update-btn');
+      const msg = document.getElementById('update-msg');
+      btn.disabled = true;
+      btn.textContent = 'Updating…';
+      try {
+        const res = await fetch('/api/update', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Update failed');
+        msg.textContent = 'Updated! Start a new Claude Code session to use v' + data.latestVersion + '.';
+        btn.style.display = 'none';
+      } catch (err) {
+        msg.textContent = 'Update failed: ' + err.message;
+        btn.disabled = false;
+        btn.textContent = 'Retry';
+      }
+    };
+
+    document.getElementById('keepAll').onclick = (e) => { pulseBtn(e.currentTarget, 'keep'); for (const f of model.files) for (const h of f.hunks) setHunk(h, false); };
+    document.getElementById('restoreAll').onclick = (e) => { pulseBtn(e.currentTarget, 'restore'); for (const f of model.files) for (const h of f.hunks) setHunk(h, true); };
+    document.getElementById('submit').onclick = showApplyConfirm;
+    document.getElementById('confirmOk').onclick = submit;
+    document.getElementById('confirmCancel').onclick = closeConfirmModal;
+    document.getElementById('confirmOverlay').onclick = (e) => { if (e.target === e.currentTarget) closeConfirmModal(); };
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeConfirmModal();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        const search = document.querySelector('.sf-search input');
+        if (search) { e.preventDefault(); search.focus(); search.select(); }
+      }
+    });
+    load();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "review-tab-marketplace",
+  "description": "Marketplace for the review-tab plugin — batch diff review for Claude Code with per-hunk keep/restore and feedback loop.",
+  "owner": {
+    "name": "Nishit"
+  },
+  "plugins": [
+    {
+      "name": "review-tab",
+      "source": "./",
+      "description": "Batch diff review: Claude edits freely, then you keep or restore every change per hunk in a browser UI. Restored hunks revert via git; your reasons feed back to Claude."
+    }
+  ]
+}

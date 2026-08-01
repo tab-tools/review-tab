@@ -1,0 +1,27 @@
+{
+  "name": "review-tab",
+  "version": "1.0.0",
+  "description": "Batch diff review for Claude Code: review, keep, or restore every change Claude made, per hunk, after the session ends.",
+  "bin": {
+    "review-tab": "bin/review-tab.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "public",
+    "hooks",
+    ".claude-plugin"
+  ],
+  "keywords": [
+    "claude-code",
+    "claude",
+    "diff",
+    "review",
+    "hooks"
+  ],
+  "license": "MIT"
+}
