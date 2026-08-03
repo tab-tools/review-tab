@@ -5,7 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Review Tab</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='2' y='4' width='28' height='24' rx='5' stroke='%2352525B' stroke-width='3'/%3E%3Cpath d='M2 12h28M14 12v16' stroke='%2352525B' stroke-width='2.5'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='2' y='4' width='28' height='24' rx='5' stroke='%2352525B' stroke-width='3'/%3E%3Cpath d='M2 12h28M14 12v16' stroke='%2352525B' stroke-width='2.5'/%3E%3C/svg%3E">
   <style>
     :root {
       --bg: #FAFAFA;
@@ -140,7 +141,7 @@
     header h1 {
       font-size: 20px;
       font-weight: 800;
-      margin: 0;
+      margin: 0 0 0 2px;
       letter-spacing: -.03em;
       display: inline-flex;
       align-items: center;
@@ -400,24 +401,48 @@
       position: fixed;
       inset: 0;
       z-index: 999;
-      background: rgba(9, 9, 11, 0.88);
+      background: rgba(0, 0, 0, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: overlayFadeIn 0.2s ease-out;
     }
 
     .confirm-overlay.hidden {
       display: none;
     }
 
+    @keyframes overlayFadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: scale(0.97) translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
     .confirm-modal {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      padding: 28px;
-      width: 580px;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      padding: 24px 28px 24px;
+      width: 540px;
       max-width: calc(100vw - 32px);
+      animation: modalSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     body.modal-open .completion-title-floating,
@@ -425,36 +450,67 @@
       display: none !important;
     }
 
-    .confirm-modal h2 {
-      margin: 0 0 18px;
-      font-size: 17px;
+    .confirm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .confirm-header h2 {
+      margin: 0;
+      font-size: 18px;
       font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .confirm-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .confirm-mode-badge .confirm-mode-text {
+      color: var(--ink);
     }
 
     .confirm-summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .cs-tile {
       background: var(--card2);
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 12px 6px;
+      border-radius: 12px;
+      padding: 12px 8px;
       text-align: center;
       min-width: 0;
       box-sizing: border-box;
       cursor: pointer;
       user-select: none;
-      transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     }
 
     .cs-tile:hover {
       border-color: var(--ink) !important;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
     .cs-tile:active {
@@ -465,14 +521,16 @@
       font-size: 22px;
       font-weight: 700;
       line-height: 1.1;
+      letter-spacing: -0.02em;
     }
 
     .cs-tile .cs-lbl {
-      font-size: 11px;
+      font-size: 10.5px;
+      font-weight: 600;
       color: var(--muted);
-      margin-top: 3px;
+      margin-top: 4px;
       text-transform: uppercase;
-      letter-spacing: .02em;
+      letter-spacing: 0.04em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -480,17 +538,23 @@
 
     @media (max-width: 480px) {
       .confirm-modal {
-        padding: 20px 16px 18px;
+        padding: 20px 18px;
       }
 
       .confirm-summary {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
       }
+
+      .confirm-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
     }
 
     .cs-tile.cs-files .cs-num {
-      color: #4B5563;
+      color: #6B7280;
     }
 
     .cs-tile.cs-kept .cs-num {
@@ -502,17 +566,27 @@
     }
 
     .cs-tile.cs-restored .cs-num {
-      color: #475569;
+      color: #2563EB;
     }
 
     [data-theme="dark"] .confirm-modal {
       background: #121215 !important;
-      border: 1px solid #3F3F46 !important;
+      border: 1px solid #27272A !important;
+    }
+
+    [data-theme="dark"] .confirm-mode-badge {
+      background: #18181B !important;
+      border-color: #27272A !important;
+      color: #A1A1AA !important;
     }
 
     [data-theme="dark"] .cs-tile {
       background: #18181B !important;
-      border: 1px solid #3F3F46 !important;
+      border: 1px solid #27272A !important;
+    }
+
+    [data-theme="dark"] .cs-tile:hover {
+      border-color: #52525B !important;
     }
 
     [data-theme="dark"] .cs-tile .cs-lbl {
@@ -520,7 +594,7 @@
     }
 
     [data-theme="dark"] .cs-tile.cs-files .cs-num {
-      color: #E4E4E7 !important;
+      color: #9CA3AF !important;
     }
 
     [data-theme="dark"] .cs-tile.cs-kept .cs-num {
@@ -535,15 +609,20 @@
       color: #60A5FA !important;
     }
 
+    .confirm-text-group {
+      margin-bottom: 22px;
+    }
+
     .confirm-msg {
       font-size: 13.5px;
       color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 18px;
+      line-height: 1.5;
+      margin: 0 0 22px;
     }
 
     .confirm-msg strong {
       color: var(--ink);
+      font-weight: 600;
     }
 
     .confirm-actions {
@@ -554,6 +633,7 @@
 
     .confirm-actions button {
       min-width: 90px;
+      padding: 8px 18px;
     }
 
     #theme {
@@ -1890,18 +1970,19 @@
     #update-banner {
       display: none;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      padding: 9px 24px;
-      background: #FFFBEB;
-      border-bottom: 1px solid #FDE68A;
+      padding: 8px 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
       font-size: 13px;
-      color: #92400E;
+      color: var(--ink);
     }
 
     [data-theme="dark"] #update-banner {
-      background: #1C1508;
-      border-bottom-color: #3D2E00;
-      color: #FDE68A;
+      background: #121215 !important;
+      border-bottom: 1px solid #3F3F46 !important;
+      color: #FFFFFF !important;
     }
 
     #update-banner.visible {
@@ -1910,31 +1991,37 @@
 
     #update-banner .upd-msg {
       flex: 1;
+      color: var(--muted);
+    }
+
+    #update-banner .upd-msg strong {
+      color: var(--ink);
+      font-weight: 600;
     }
 
     #update-banner .upd-btn {
       font-size: 12px;
-      padding: 4px 12px;
+      font-weight: 500;
+      padding: 0 12px;
       height: 28px;
-      background: #F59E0B;
-      border: 1px solid #D97706;
-      color: #1C1508;
+      background: var(--accent);
+      color: var(--accent-ink);
+      border: 1px solid var(--line);
       border-radius: 6px;
-      font-weight: 600;
       cursor: pointer;
       line-height: 1;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: opacity .15s;
+      transition: opacity 0.15s ease;
     }
 
     #update-banner .upd-btn:hover:not(:disabled) {
-      opacity: .85;
+      opacity: 0.9;
     }
 
     #update-banner .upd-btn:disabled {
-      opacity: .55;
-      cursor: default;
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -2034,7 +2121,10 @@
   </div>
   <div class="confirm-overlay hidden" id="confirmOverlay">
     <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-      <h2 id="confirmTitle">Apply Review</h2>
+      <div class="confirm-header">
+        <h2 id="confirmTitle">Apply Review</h2>
+        <div id="confirmModeLabel" class="confirm-mode-badge"></div>
+      </div>
       <div class="confirm-summary" id="confirmSummary"></div>
       <p class="confirm-msg" id="confirmMsg"></p>
       <div class="confirm-actions">
@@ -2043,6 +2133,22 @@
       </div>
     </div>
   </div>
+  <div class="confirm-overlay hidden" id="modeSwitchOverlay">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modeSwitchTitle">
+      <div class="confirm-header">
+        <h2 id="modeSwitchTitle">Heads up</h2>
+      </div>
+      <p class="confirm-msg" id="modeSwitchMsg"></p>
+      <div class="confirm-actions">
+        <button id="modeSwitchCancel">Cancel</button>
+        <button class="primary" id="modeSwitchConfirm">Switch Anyway</button>
+      </div>
+    </div>
+  </div>
+  <!-- Footer -->
+  <footer>
+    <!-- Review Tab Footer -->
+  </footer>
   <script>
     (function initTheme() {
       let t = null;
@@ -2072,15 +2178,9 @@
       document.getElementById('theme').innerHTML =
         document.documentElement.dataset.theme === 'dark' ? ICON_SUN : ICON_MOON;
     }
-    // Reload fires pagehide too — without this flag the close beacon would fire on version-upgrade
-    // reloads and falsely clear the "tab still open" state.
-    let intentionalReload = false;
     window.addEventListener('pagehide', () => {
-      if (intentionalReload) return; // reloading on purpose — not a real close
       try { navigator.sendBeacon('/api/close'); } catch (_) { }
     });
-
-    window.__crReload = window.__crReload || (() => { intentionalReload = true; location.reload(); });
 
     document.getElementById('theme').onclick = (e) => {
       const btn = e.currentTarget;
@@ -2164,9 +2264,8 @@
     }
 
     function saveState() {
-      const keys = [];
-      if (currentSig) keys.push('cr-state-' + currentSig);
-      keys.push('cr-state-latest');
+      if (!currentSig) return; // nothing to key on yet — selections only happen after the review ID is known
+      const keys = ['cr-state-' + currentMode + '-' + currentSig];
       try {
         const rejObj = {};
         for (const hId in lineRej) {
@@ -2188,8 +2287,9 @@
 
     function loadState() {
       try {
-        const key = currentSig ? ('cr-state-' + currentSig) : 'cr-state-latest';
-        const stored = sessionStorage.getItem(key) || localStorage.getItem(key) || sessionStorage.getItem('cr-state-latest') || localStorage.getItem('cr-state-latest');
+        if (!currentSig) return; // no review ID yet — nothing to load
+        const modeKey = 'cr-state-' + currentMode + '-' + currentSig;
+        const stored = sessionStorage.getItem(modeKey) || localStorage.getItem(modeKey);
         if (stored) {
           const { lineRej: rejObj, reasons: savedReasons, reasonConfirmed: savedConfirmed } = JSON.parse(stored);
           if (rejObj) {
@@ -2216,11 +2316,10 @@
     function clearState() {
       try {
         if (currentSig) {
-          sessionStorage.removeItem('cr-state-' + currentSig);
-          localStorage.removeItem('cr-state-' + currentSig);
+          const modeKey = 'cr-state-' + currentMode + '-' + currentSig;
+          sessionStorage.removeItem(modeKey);
+          localStorage.removeItem(modeKey);
         }
-        sessionStorage.removeItem('cr-state-latest');
-        localStorage.removeItem('cr-state-latest');
       } catch (_) { }
     }
 
@@ -2229,7 +2328,7 @@
         loadViewedFiles();
         renderAll();
       }
-      if (currentSig && e.key === 'cr-state-' + currentSig) {
+      if (currentSig && e.key === 'cr-state-' + currentMode + '-' + currentSig) {
         loadState();
         renderAll();
       }
@@ -2264,7 +2363,7 @@
         if (version && CR_VERSION && version !== CR_VERSION) {
           // Server upgraded — reload once to pick up new JS.
           clearInterval(pollTimer);
-          window.__crReload();
+          location.reload();
           return;
         }
         if (sig && sig !== 'none' && sig !== currentSig) {
@@ -2295,6 +2394,7 @@
     }
 
     function applyReview(data) {
+      const prevFilePath = (model && model.files && model.files[currentFileIndex]) ? model.files[currentFileIndex].filePath : null;
       model = data;
       if (model.error || !model.files || !model.files.length) {
         document.getElementById('main').innerHTML = '<div class="empty">No changes to review.</div>';
@@ -2309,7 +2409,16 @@
         changedIdx[h.id] = h.lines.map((l, i) => [l, i]).filter(([l]) => l[0] === '+' || l[0] === '-').map(([, i]) => i);
       }
       loadState();
-      if (currentFileIndex >= model.files.length) currentFileIndex = 0;
+      if (prevFilePath) {
+        const matchingIdx = model.files.findIndex(f => f.filePath === prevFilePath);
+        if (matchingIdx !== -1) {
+          currentFileIndex = matchingIdx;
+        } else if (currentFileIndex >= model.files.length) {
+          currentFileIndex = 0;
+        }
+      } else if (currentFileIndex >= model.files.length) {
+        currentFileIndex = 0;
+      }
       renderAll();
     }
 
@@ -2367,8 +2476,74 @@
       btn.onclick = () => selectMode(btn.dataset.value);
     }
 
+    let modeSwitchAcknowledged = false;
+
+    function loadModeSwitchAck() {
+      try {
+        modeSwitchAcknowledged = !!localStorage.getItem('cr-mode-switch-ack');
+      } catch (_) { }
+    }
+
+    function saveModeSwitchAck() {
+      try {
+        localStorage.setItem('cr-mode-switch-ack', '1');
+      } catch (_) { }
+    }
+
+    function hasSelectionsInCurrentMode() {
+      for (const id in lineRej) {
+        if (lineRej[id] && lineRej[id].size > 0) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     async function selectMode(mode) {
       if (mode === currentMode) return;
+
+      // Check if there are any pending selections in current mode
+      if (!modeSwitchAcknowledged && hasSelectionsInCurrentMode()) {
+        showModeSwitchWarning(mode);
+        return;
+      }
+
+      proceedModeSwitch(mode);
+    }
+
+    function showModeSwitchWarning(targetMode) {
+      const modeName = targetMode === 'accumulate' ? 'All Changes' : 'Last Prompt';
+      const currentModeName = currentMode === 'accumulate' ? 'All Changes' : 'Last Prompt';
+      const msg = `You have marked some lines for restore in <strong>${currentModeName}</strong>.<br/><br/>` +
+        `Each mode keeps its own selections. <strong>${modeName}</strong> has its own set of hunks based on a different baseline, ` +
+        `so the two modes are reviewed independently — Apply in either mode only acts on that mode's selections.<br/><br/>` +
+        `Your <strong>${currentModeName}</strong> selections are saved and will still be there if you come back.`;
+
+      document.getElementById('modeSwitchMsg').innerHTML = msg;
+      document.body.classList.add('modal-open');
+      document.getElementById('modeSwitchOverlay').classList.remove('hidden');
+      document.getElementById('modeSwitchConfirm').focus();
+
+      const confirmHandler = () => {
+        modeSwitchAcknowledged = true;
+        saveModeSwitchAck();
+        document.body.classList.remove('modal-open');
+        document.getElementById('modeSwitchOverlay').classList.add('hidden');
+        proceedModeSwitch(targetMode);
+      };
+      const cancelHandler = () => {
+        document.body.classList.remove('modal-open');
+        document.getElementById('modeSwitchOverlay').classList.add('hidden');
+      };
+
+      document.getElementById('modeSwitchConfirm').onclick = confirmHandler;
+      document.getElementById('modeSwitchCancel').onclick = cancelHandler;
+      document.getElementById('modeSwitchOverlay').onclick = (e) => {
+        if (e.target === e.currentTarget) cancelHandler();
+      };
+    }
+
+    async function proceedModeSwitch(mode) {
       const prev = currentMode;
       paintMode(mode);
       const main = document.getElementById('main');
@@ -2443,6 +2618,7 @@
     }
 
     async function load() {
+      loadModeSwitchAck();
       const [firstSig, res] = await Promise.all([
         fetch('/api/sig').then(r => r.json()).catch(() => null),
         fetch('/api/review').then(r => r.json()).catch(() => null),
@@ -3040,6 +3216,11 @@
     }
 
     function showApplyConfirm() {
+      const modeLabel = currentMode === 'accumulate' ? 'All Changes' : 'Last Prompt';
+      const modeBadge = document.getElementById('confirmModeLabel');
+      if (modeBadge) {
+        modeBadge.innerHTML = 'Mode: <span class="confirm-mode-text">' + modeLabel + '</span>';
+      }
       let totalFiles = model.files.length, kept = 0, partial = 0, restored = 0;
       for (const f of model.files) for (const h of f.hunks) {
         const s = lineRej[h.id].size, total = changedIdx[h.id].length;
@@ -3054,8 +3235,8 @@
         '<div class="cs-tile cs-partial" data-filter="partial" title="Click to filter by partially kept files"><div class="cs-num">' + partial + '</div><div class="cs-lbl">Partial</div></div>' +
         '<div class="cs-tile cs-restored" data-filter="restored" title="Click to filter by restored files"><div class="cs-num">' + restored + '</div><div class="cs-lbl">Restored</div></div>';
 
-      summary.querySelectorAll('.cs-tile').forEach(function(tile) {
-        tile.onclick = function() {
+      summary.querySelectorAll('.cs-tile').forEach(function (tile) {
+        tile.onclick = function () {
           const filterType = tile.getAttribute('data-filter');
           fileFilter = filterType;
           closeConfirmModal();
@@ -3070,15 +3251,15 @@
       const fileWord = totalFiles === 1 ? 'file' : 'files';
       let msg;
       if (restored === 0 && partial === 0) {
-        msg = 'All changes across <strong>' + totalFiles + ' ' + fileWord + '</strong> will be kept.';
+        msg = 'In <strong>' + modeLabel + '</strong> mode, all changes across <strong>' + totalFiles + ' ' + fileWord + '</strong> will be kept.';
       } else if (kept === 0 && partial === 0) {
-        msg = 'All <strong>' + restored + ' change' + (restored === 1 ? '' : 's') + '</strong> across <strong>' + totalFiles + ' ' + fileWord + '</strong> will be restored.';
+        msg = 'In <strong>' + modeLabel + '</strong> mode, all <strong>' + restored + ' change' + (restored === 1 ? '' : 's') + '</strong> across <strong>' + totalFiles + ' ' + fileWord + '</strong> will be restored.';
       } else {
         const parts = [];
         if (kept > 0) parts.push('<strong>' + kept + ' change' + (kept === 1 ? '' : 's') + '</strong> kept');
         if (partial > 0) parts.push('<strong>' + partial + '</strong> partially restored');
         if (restored > 0) parts.push('<strong>' + restored + '</strong> fully restored');
-        msg = parts.join(', ') + ' across <strong>' + totalFiles + ' ' + fileWord + '</strong>.';
+        msg = 'In <strong>' + modeLabel + '</strong> mode: ' + parts.join(', ') + ' across <strong>' + totalFiles + ' ' + fileWord + '</strong>.';
       }
       document.getElementById('confirmMsg').innerHTML = msg;
       document.body.classList.add('modal-open');
@@ -3147,13 +3328,15 @@
     function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
     function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+    let updateDone = false; // set after a successful in-session update so the banner stays as confirmation
     function updateBanner(available, latestVersion) {
       const banner = document.getElementById('update-banner');
       const msg = document.getElementById('update-msg');
       if (!banner) return;
+      if (updateDone) return; // keep the "restart to apply" confirmation in place
       if (!available) { banner.classList.remove('visible'); return; }
       if (banner.classList.contains('visible')) return; // already shown, don't reset mid-update
-      msg.textContent = 'Review Tab v' + latestVersion + ' is available.';
+      msg.innerHTML = '<strong>Review Tab v' + esc(latestVersion) + '</strong> is available.';
       banner.classList.add('visible');
     }
 
@@ -3166,8 +3349,9 @@
         const res = await fetch('/api/update', { method: 'POST' });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Update failed');
-        msg.textContent = 'Updated! Start a new Claude Code session to use v' + data.latestVersion + '.';
+        msg.innerHTML = '<strong>Updated to v' + esc(data.latestVersion) + '!</strong> Restart Claude Code to apply.';
         btn.style.display = 'none';
+        updateDone = true;
       } catch (err) {
         msg.textContent = 'Update failed: ' + err.message;
         btn.disabled = false;
@@ -3182,7 +3366,14 @@
     document.getElementById('confirmCancel').onclick = closeConfirmModal;
     document.getElementById('confirmOverlay').onclick = (e) => { if (e.target === e.currentTarget) closeConfirmModal(); };
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeConfirmModal();
+      if (e.key === 'Escape') {
+        const modeSwitchOverlay = document.getElementById('modeSwitchOverlay');
+        if (modeSwitchOverlay && !modeSwitchOverlay.classList.contains('hidden')) {
+          document.getElementById('modeSwitchCancel').click();
+        } else {
+          closeConfirmModal();
+        }
+      }
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         const search = document.querySelector('.sf-search input');
         if (search) { e.preventDefault(); search.focus(); search.select(); }
