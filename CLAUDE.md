@@ -24,13 +24,15 @@ Claude Code has no native mechanism for reviewing a batch of edits after the fac
 
 **Line numbers and human-readable hunk ranges.** Each diff line shows both its old and new line number in the file. Hunk boundaries are shown as "Lines N to M" rather than raw unified-diff @@ syntax.
 
-**Two review modes.** The review page has a mode toggle: "Last Prompt" (per-request) shows only the files Claude touched in the most recent prompt, diffed against the baseline that was snapshotted before that prompt. "All Changes" (accumulate) shows every uncommitted change in the working tree vs HEAD, regardless of which session or prompt made it. Mode is in-memory only; it always starts as per-request when a new server spawns.
+**Two review modes with independent selections.** The review page has a mode toggle: "Last Prompt" (per-request) shows only the files Claude touched in the most recent prompt, diffed against the baseline that was snapshotted before that prompt. "All Changes" (accumulate) shows every uncommitted change in the working tree vs HEAD, regardless of which session or prompt made it. Selections (keep/restore/partial per hunk) are kept **completely separate** per mode — stored under the key `cr-state-{mode}-{sig}` in both sessionStorage and localStorage. When you switch modes, your previous mode's selections are preserved and will still be there if you return. Apply only applies the selections from the **current** mode; other modes' selections are not touched. Switching modes shows a one-time confirmation explaining this independence.
+
+**Apply confirmation modal.** Clicking Apply shows a modal with a summary of what will be applied (files affected, count of kept/partial/fully-restored hunks) and displays which **mode** the selections are from. This makes it clear exactly which mode's selections you're applying before confirming. A small note reminds you that only the current mode's selections are applied. Anything un-touched in other modes is not affected.
 
 **Feedback loop.** Restoring something with a typed reason writes that reason, along with which file and which lines, to .review-tab/feedback.md. The next time you send Claude a message, a UserPromptSubmit hook reads that file, prints its contents (which Claude Code adds to Claude's context for that turn), and deletes the file so it's delivered exactly once.
 
 **Auto-update.** On startup the server checks the GitHub tags API for a newer version. If one is available, the review page shows an update banner. Clicking "Update Now" calls /api/update, which runs `claude plugin install review-tab@review-tab-marketplace` and then exits so the next session picks up the new code. Stale servers (version mismatch detected on the /api/status response) are automatically replaced when a new review is triggered.
 
-**Smart auto-open.** The review page opens in your browser automatically once Claude finishes. A genuinely first-ever launch for a project (no prior server has ever run there) opens instantly. If a server previously ran for that project recently, there's a short grace period before opening, specifically to avoid a duplicate tab appearing if an existing tab from the previous server session is about to reconnect.
+**Smart auto-open and in-place refresh.** The review page opens in your browser automatically when Claude finishes and there's no review tab already open. If a review tab is already open showing the same diff, nothing happens — avoid redundant tabs. If the diff changes (Claude made new edits), the existing open tab refreshes in place with the new content via its polling mechanism — no new tab is opened. The browser is only opened when there's no server yet or when the server is running but no tab is active. When you close a tab, a `pagehide` beacon fires `/api/close` to reset the server's activity timer and clear `opened.sig`, so the next Claude prompt can open a fresh tab even if the diff is identical.
 
 ## File structure
 
@@ -54,16 +56,25 @@ package.json                         version, currently 1.0.0
 
 Runtime state lives in .review-tab/ inside whichever project the plugin is reviewing (not in the plugin's own folder), and is git-excluded automatically:
 
+**Server-side state:**
 session.json          current baseline commit + tracked file list
-review.json            frozen copy of the review model, taken the moment the page opens
-review-current.json     snapshot of the model as last served by /api/review; used by /api/submit so hunk IDs stay consistent even if the baseline or working tree changes between load and submit
-feedback.md              pending rejection reasons, deleted once delivered
-opened.sig                signature used to avoid reopening a tab for an unchanged diff
-server.pid                 current server's process id; mtime used to detect a recent prior server for the auto-open grace period
-port                        persisted port number when the default hash-derived port was reassigned due to collision
-log.txt                      append-only diagnostic log, never trimmed
-config.json                   optional, user-created; currently supports {"transcriptFilter": false}
-tmp-index, tmp-index-now        internal git scratch files used to build snapshots without touching the real index
+review.json           frozen copy of the review model (per-request mode); updated when diff changes and a tab is already open
+review-current.json   snapshot of the model as last served by /api/review; used by /api/submit so hunk IDs stay consistent even if baseline or tree changes
+feedback.md           pending rejection reasons, deleted once delivered
+opened.sig            SHA1 of diff files; prevents reopening the same diff if tab is already active; cleared by /api/close beacon
+server.pid            current server's process id; mtime used to detect a recent prior server for auto-open grace period
+port                  persisted port number when hash-derived port was reassigned due to collision
+log.txt               append-only diagnostic log, never trimmed
+config.json           optional, user-created; supports `{"transcriptFilter": false}` to show all working-tree changes vs HEAD
+tmp-index, tmp-index-now    internal git scratch files used to build snapshots without touching the real index
+
+**Client-side state (browser):**
+Browser selections are stored in both **sessionStorage** and **localStorage** under the key: `cr-state-{mode}-{sig}` where mode is `per-request` or `accumulate` and sig is the review signature. Each entry contains:
+- `lineRej`: object mapping hunk IDs to array of rejected line indices
+- `reasons`: object mapping hunk IDs to restore reasons (user-typed text)
+- `reasonConfirmed`: object mapping hunk IDs to whether reason was user-confirmed
+
+`cr-mode-switch-ack`: localStorage-only flag set after user sees the first mode-switch confirmation; ensures the modal only appears once per browser.
 
 ## Working conventions for this project
 

@@ -131,7 +131,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 24px;
+      padding: 8px 24px;
       background: var(--card);
       border-bottom: 1px solid var(--line);
       box-shadow: var(--shadow);
@@ -753,7 +753,7 @@
     }
 
     .wrap {
-      padding: 24px;
+      padding: 16px 24px 24px 24px;
       width: 100%;
       box-sizing: border-box;
       flex: 1;
@@ -764,15 +764,15 @@
     .stats {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 14px;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .stat {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 16px 18px;
+      border-radius: 8px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -785,7 +785,7 @@
     }
 
     .stat .num {
-      font-size: 26px;
+      font-size: 18px;
       font-weight: 600;
       line-height: 1.1;
       color: var(--ink);
@@ -793,15 +793,15 @@
 
     .stat .lbl {
       color: var(--muted);
-      font-size: 13px;
-      margin-top: 2px;
+      font-size: 11.5px;
+      margin-top: 1px;
       font-weight: 500;
     }
 
     .stat .badge {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -866,22 +866,25 @@
 
     .sidebar {
       flex-shrink: 0;
-      width: 300px;
+      width: calc(20% - 8px);
+      min-width: 200px;
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 12px;
       box-shadow: var(--shadow);
       overflow: hidden;
       position: sticky;
-      top: 90px;
+      top: 69px;
       display: flex;
       flex-direction: column;
-      max-height: calc(100vh - 110px);
+      max-height: calc(100vh - 89px);
     }
 
     .resize-handle {
       flex-shrink: 0;
       width: 20px;
+      margin: 0 -5px;
+      z-index: 2;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2178,9 +2181,17 @@
       document.getElementById('theme').innerHTML =
         document.documentElement.dataset.theme === 'dark' ? ICON_SUN : ICON_MOON;
     }
-    window.addEventListener('pagehide', () => {
-      try { navigator.sendBeacon('/api/close'); } catch (_) { }
-    });
+    const sendCloseNotif = () => {
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/close');
+        } else {
+          fetch('/api/close', { method: 'POST', keepalive: true });
+        }
+      } catch (_) { }
+    };
+    window.addEventListener('pagehide', sendCloseNotif);
+    window.addEventListener('beforeunload', sendCloseNotif);
 
     document.getElementById('theme').onclick = (e) => {
       const btn = e.currentTarget;
@@ -2225,7 +2236,7 @@
 
     let model = null;
     let currentFileIndex = 0;
-    let sidebarW = 300;
+    let sidebarW = null;
     const viewedFiles = new Set(); // filePath -> viewed, persists across re-renders (e.g. live refresh)
     let fileSearch = '';   // sidebar search text, persists across sidebar rebuilds
     let fileFilter = 'all'; // sidebar status filter: all | kept | partial | restored | viewed | unviewed
@@ -2806,7 +2817,7 @@
 
     function buildSidebar() {
       const aside = el('div', 'sidebar');
-      aside.style.width = sidebarW + 'px';
+      if (sidebarW !== null) aside.style.width = sidebarW + 'px';
 
       const head = el('div', 'sidebar-head');
       const filterItems = FILTER_OPTS.map(function (opt) {
