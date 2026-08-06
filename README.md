@@ -52,7 +52,7 @@ This registers the plugin's hooks automatically. There's no settings file to edi
 2. Ask Claude to do a task that involves editing files, and let it run to completion without interrupting it.
 3. When it finishes, your browser opens automatically to a review page for that project.
 4. Work through the file list in the sidebar in whatever order you like. For each file, keep or restore what you want, check it off as viewed once you're satisfied with it, and leave a short reason on anything you restore.
-5. Click **Apply Review**. Restored changes are reverted; everything else stays as Claude left it. This works regardless of whether every file has been marked viewed.
+5. Click **Apply Changes**. Restored changes are reverted; everything else stays as Claude left it. This works regardless of whether every file has been marked viewed.
 6. If you restored anything, your next message to Claude will include an automatic note about what was restored and why.
 
 ## How it works

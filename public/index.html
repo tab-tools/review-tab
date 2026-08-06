@@ -609,6 +609,179 @@
       color: #60A5FA !important;
     }
 
+    .mode-compare-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .mode-card {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: left;
+    }
+
+    .mode-card.active-mode-card {
+      border-color: var(--ink);
+    }
+
+    .mode-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .mode-card-title {
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--ink);
+    }
+
+    .mode-card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      line-height: 1.2;
+    }
+
+    .mode-card-tag.active {
+      background: var(--ink);
+      color: var(--card);
+    }
+
+    .mode-card-tag.target {
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .mode-card-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.35;
+      min-height: 32px;
+    }
+
+    .mode-card-stat {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .mode-card-stat .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #D97706;
+    }
+
+    [data-theme="dark"] .mode-card-stat .stat-badge {
+      color: #FBBF24 !important;
+    }
+
+    .mode-card-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      user-select: none;
+    }
+
+    .mode-compare-note {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    [data-theme="dark"] .mode-card {
+      background: #18181B !important;
+      border-color: #27272A !important;
+    }
+
+    [data-theme="dark"] .mode-card.active-mode-card {
+      border-color: #52525B !important;
+    }
+
+    [data-theme="dark"] .mode-compare-note {
+      background: #18181B !important;
+      border-color: #27272A !important;
+    }
+
+    .mode-how-it-works {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .mhw-title {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .mhw-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .mhw-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .mhw-badge {
+      font-weight: 700;
+      font-size: 11px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+
+    .mhw-text {
+      color: var(--ink);
+      flex: 1;
+    }
+
+    [data-theme="dark"] .mode-how-it-works {
+      background: #18181B !important;
+      border-color: #27272A !important;
+    }
+
+    [data-theme="dark"] .mhw-badge {
+      background: #27272A !important;
+      border-color: #3F3F46 !important;
+      color: #FFFFFF !important;
+    }
+
     .confirm-text-group {
       margin-bottom: 22px;
     }
@@ -2053,7 +2226,7 @@
         <path d="M3 3v5h5" />
       </svg>Restore All
     </button>
-    <button class="primary" id="submit">Apply Review</button>
+    <button class="primary" id="submit">Apply Changes</button>
   </header>
   <div id="update-banner" role="alert" aria-live="polite">
     <span class="upd-msg" id="update-msg"></span>
@@ -2125,7 +2298,7 @@
   <div class="confirm-overlay hidden" id="confirmOverlay">
     <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
       <div class="confirm-header">
-        <h2 id="confirmTitle">Apply Review</h2>
+        <h2 id="confirmTitle">Apply Changes</h2>
         <div id="confirmModeLabel" class="confirm-mode-badge"></div>
       </div>
       <div class="confirm-summary" id="confirmSummary"></div>
@@ -2362,10 +2535,12 @@
         if (first.mode) paintMode(first.mode);
       }
       pollTimer = setInterval(pollOnce, 1000);
-      // Immediate poll on visibility-restore to beat background-tab timer throttling.
+      // Immediate poll on visibility/focus restore to beat background-tab timer throttling.
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') pollOnce();
       });
+      window.addEventListener('focus', pollOnce);
+      window.addEventListener('pageshow', pollOnce);
     }
 
     async function pollOnce() {
@@ -2489,15 +2664,20 @@
 
     let modeSwitchAcknowledged = false;
 
+    function getModeSwitchAckKey() {
+      const port = window.location.port || 'default';
+      return `cr-mode-switch-ack-${port}`;
+    }
+
     function loadModeSwitchAck() {
       try {
-        modeSwitchAcknowledged = !!localStorage.getItem('cr-mode-switch-ack');
+        modeSwitchAcknowledged = !!sessionStorage.getItem(getModeSwitchAckKey());
       } catch (_) { }
     }
 
     function saveModeSwitchAck() {
       try {
-        localStorage.setItem('cr-mode-switch-ack', '1');
+        sessionStorage.setItem(getModeSwitchAckKey(), '1');
       } catch (_) { }
     }
 
@@ -2522,13 +2702,30 @@
       proceedModeSwitch(mode);
     }
 
+    function countActiveSelections() {
+      let count = 0;
+      for (const id in lineRej) {
+        if (lineRej[id]) count += lineRej[id].size;
+      }
+      return count;
+    }
+
     function showModeSwitchWarning(targetMode) {
       const modeName = targetMode === 'accumulate' ? 'All Changes' : 'Last Prompt';
       const currentModeName = currentMode === 'accumulate' ? 'All Changes' : 'Last Prompt';
-      const msg = `You have marked some lines for restore in <strong>${currentModeName}</strong>.<br/><br/>` +
-        `Each mode keeps its own selections. <strong>${modeName}</strong> has its own set of hunks based on a different baseline, ` +
-        `so the two modes are reviewed independently — Apply in either mode only acts on that mode's selections.<br/><br/>` +
-        `Your <strong>${currentModeName}</strong> selections are saved and will still be there if you come back.`;
+
+      const msg = `
+        <div style="font-size:13.5px;line-height:1.6;color:var(--ink);text-align:left;">
+          <div style="margin-bottom:10px;">Each mode reviews a different set of changes:</div>
+          <ul style="margin:0 0 12px;padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            <li><strong>Last Prompt:</strong> Edits from the latest prompt only.</li>
+            <li><strong>All Changes:</strong> All uncommitted changes in the project.</li>
+          </ul>
+          <div style="color:var(--muted);font-size:12.5px;">
+            Your <strong>${currentModeName}</strong> choices stay saved. <strong>Apply</strong> only acts on <strong>${modeName}</strong>.
+          </div>
+        </div>
+      `;
 
       document.getElementById('modeSwitchMsg').innerHTML = msg;
       document.body.classList.add('modal-open');

@@ -1,8 +1,8 @@
 {
   "name": "review-tab",
-  "description": "Batch diff review for Claude Code. Claude edits freely; when it stops, a review UI opens where you keep or restore every change per hunk. Restored hunks are reverted via git and your reasons are saved as feedback for the next session.",
+  "description": "After Claude edits your code, a review page opens in your browser showing every change it made. You go through each change and decide to keep it or undo it, and you can leave a note explaining why. If you undo something, Claude reads your note the next time you send a message in that session, so it knows what you didn't want.",
   "version": "1.0.0",
   "author": {
-    "name": "Nishit"
+    "name": "Nishit K"
   }
 }

@@ -74,7 +74,7 @@ Browser selections are stored in both **sessionStorage** and **localStorage** un
 - `reasons`: object mapping hunk IDs to restore reasons (user-typed text)
 - `reasonConfirmed`: object mapping hunk IDs to whether reason was user-confirmed
 
-`cr-mode-switch-ack`: localStorage-only flag set after user sees the first mode-switch confirmation; ensures the modal only appears once per browser.
+`cr-mode-switch-ack-{port}`: sessionStorage flag set per port after user sees the mode-switch confirmation; ensures the modal appears once per port session and resets when the tab/session closes.
 
 ## Working conventions for this project
 
