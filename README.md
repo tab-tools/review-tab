@@ -40,7 +40,7 @@ Restored changes are reverted directly on disk using git, computed fresh each ti
 ## Installation
 
 ```bash
-claude plugin marketplace add <your-github-user>/review-tab
+claude plugin marketplace add tab-tools/review-tab
 claude plugin install review-tab@review-tab-marketplace
 ```
 
